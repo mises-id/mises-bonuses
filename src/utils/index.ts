@@ -33,3 +33,5 @@ export const MisInfo = {
   "decimals": 18,
   "image": 'logo.png'
 }
+
+export const misesBurnAddress = "0xb60e8dd61c5d32be8058bb8eb970870f07233155"

@@ -15,6 +15,7 @@
       --background-color: #000000;
       --icon-color: rgb(152, 161, 192);
       --adm-color-text: white;
+      --adm-color-background: #000000
     }
   }
   @media (prefers-color-scheme: light) {
@@ -22,9 +23,10 @@
       --border-color:rgb(210, 217, 238);
       --widget-bg-color: rgb(232, 236, 251);
       --theme-text-color: #0d111c;
-      --background-color: #ffffff;
+      --background-color: #f7f7f7;
       --icon-color: #7780a0;
       --adm-color-text: #0d111c;
+      --adm-color-background:#f7f7f7;
     }
   }
   body{
