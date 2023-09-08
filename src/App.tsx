@@ -8,13 +8,17 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import Routes from './routes';
+import Web3Provider from './components/Web3Provider';
+
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes />
-      </BrowserRouter>
+      <Web3Provider>
+        <BrowserRouter>
+          <Routes />
+        </BrowserRouter>
+      </Web3Provider>
     </div>
   );
 }

@@ -7,7 +7,7 @@
  */
 import React from 'react'
 import { Navigate, useRoutes } from 'react-router-dom'
-import { Bonuses, Mining, NotFund } from '@/pages'
+import { Bonuses, MISToMB, Mining, NotFund } from '@/pages'
 import Loading from '@/components/pageLoading'
 // import { withCache } from './withCache'
 type CutonFallBackT =
@@ -39,9 +39,14 @@ const Routes = () => {
       element: SuspenseWrapper(Bonuses)
     },
     {
+      path: '/mistomb',
+      element: SuspenseWrapper(MISToMB)
+    },
+    {
       path: '/404',
       element: SuspenseWrapper(NotFund)
     },
+    { path: '/', element: <Navigate to="/mistomb" replace /> },
     { path: '*', element: <Navigate to="/404" replace /> }
   ])
   return RouterList

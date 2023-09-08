@@ -12,3 +12,4 @@ import React from 'react'
 export const NotFund = React.lazy(() => import('./NotFound'))
 export const Mining = React.lazy(() => import('./Mining'))
 export const Bonuses = React.lazy(() => import('./Bonuses'))
+export const MISToMB = React.lazy(() => import('./MISToMB'))

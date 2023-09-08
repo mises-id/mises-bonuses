@@ -4,10 +4,11 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo } from '@/utils'
-const { useChainId, useAccounts, useIsActivating, useIsActive, useProvider } = hooks
+import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo } from '@/utils'
+import { useMisesWallet } from '@/hooks/useMisesWallet'
+const { useChainId, useAccounts, useIsActivating, useIsActive } = hooks
 
-function Bonuses() {
+function MISToMB() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
 
   const [formValue, setformValue] = useState<string | undefined>('')
@@ -16,14 +17,17 @@ function Bonuses() {
   const [formBalance, setformBalance] = useState<string | undefined>('')
   const [toBalance, settoBalance] = useState<string | undefined>('')
 
+
   const { connector } = useWeb3React();
+
+  const { activate: misesProviderActivate, isActivating: misesWalletIsActivating, account: misesAccount } = useMisesWallet();
   const chainId = useChainId()
   const accounts = useAccounts()
   const isActivating = useIsActivating()
 
   const isActive = useIsActive()
 
-  const provider = useProvider()
+  // const provider = useProvider()
   // const ENSNames = useENSNames(provider)
 
   const fetchBonusesBalance = () => {
@@ -42,28 +46,52 @@ function Bonuses() {
       fetchMBBalance()
     }
   }, [accounts])
-  
+
+  const stepStatus = useMemo(() => {
+    if(!misesAccount) {
+      return 1;
+    }
+
+    // ethereum account connected
+    if(!isActive) {
+      return 2;
+    }
+    return 3;
+
+  }, [misesAccount, isActive])
+
+  const stepStatusText = useMemo(() => {
+    if(stepStatus === 1) {
+      return 'Connect wallet for MIS';
+    }
+
+    // ethereum account connected
+    if(stepStatus === 2) {
+      return 'Connect wallet for MB';
+    }
+    return 'Redeem';
+
+  }, [stepStatus])
 
   // button state text
   const ButtonText = useMemo(() => {
     if (isActivating) {
-      return 'Connecting wallet ...'
+      return 'Connecting wallet...'
+    }
+    if(misesWalletIsActivating) {
+      return 'Connecting Mises wallet...'
     }
 
-    if (!isActive) {
-      return 'Connect Wallet'
-    }
-
-    return 'Redeem'
-  }, [isActive, isActivating])
+    return stepStatusText
+  }, [isActivating, stepStatusText, misesWalletIsActivating])
 
   // button status 
   const buttonDisabled = useMemo(() => {
-    if (isActivating) {
+    if (isActivating || misesWalletIsActivating) {
       return true;
     }
     return false;
-  }, [isActivating])
+  }, [isActivating, misesWalletIsActivating])
 
   const connectWallet = async () => {
     try {
@@ -104,19 +132,7 @@ function Bonuses() {
   }
 
   const signMsg = async () => {
-    const timestamp = new Date().getTime();
-    if (accounts && accounts.length) {
-      const address = accounts[0]
-      const sigMsg = `address=${address}&nonce=${timestamp}`
-      const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
-      const getEncryptionPublicKey = await provider?.send('eth_getEncryptionPublicKey', [address, sigMsg])
-      const auth = `address=${address}&nonce=${timestamp}&pubkey=${getEncryptionPublicKey}&sig=${personalSignMsg}`
-      return auth
-    }
-    return Promise.reject({
-      code: 9998,
-      message: 'Invalid address'
-    })
+
   }
 
   const resetData = () => {
@@ -141,12 +157,29 @@ function Bonuses() {
 
   const buttonClick = async () => {
     try {
-      await connectWallet();
-      await checkChainId();
-      await checkUserAddress();
-      await swap()
-    } catch (error) {
+      if(stepStatus === 1) {
+        await misesProviderActivate()
+        return;
+      }
 
+      if(stepStatus === 2) {
+        await connectWallet();
+        await checkChainId();
+        await checkUserAddress();
+        return;
+      }
+
+      if(stepStatus === 3) {
+        await swap()
+      }
+      
+    } catch (error: any) {
+      if(error && error.code) {
+        if(error.code === ErrorCode.notFoundMises) {
+          // show not found error message tips
+        }
+      }
+      console.log(error, 'error')
     }
   }
 
@@ -162,16 +195,15 @@ function Bonuses() {
     setshowConfirmDialog(false)
   }
 
-
   return (
     <div>
-      <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>Bonus</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
+      <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
       <div className='container light:bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px]'>
         <div className="flex justify-between items-center px-8 py-12 mb-8 text-18">
           <p className="title">Redeem</p>
         </div>
         <TokenInput
-          coinInfo={BonusesInfo}
+          coinInfo={MisInfo}
           value={formValue}
           onChange={(e) => {
             setformValue(e)
@@ -237,4 +269,4 @@ function Bonuses() {
   )
 }
 
-export default Bonuses
+export default MISToMB
