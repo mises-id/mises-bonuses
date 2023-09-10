@@ -1,7 +1,7 @@
 import { CoinInfo } from '@/utils/types';
 import { Input } from 'antd-mobile'
 import { InputProps } from 'antd-mobile/es/components/input'
-import React, { FC } from 'react'
+import React, { FC, useMemo } from 'react'
 interface TokenInputProps extends InputProps {
   balance?: string;
   coinInfo?: CoinInfo;
@@ -14,6 +14,13 @@ const TokenInput:FC<TokenInputProps> = (props) => {
       props.onChange?.(balance)
     }
   }
+
+  const showMaxButton = useMemo(() => {
+    if(showMax && balance && balance !== "0") {
+      return true;
+    }
+    return false;
+  }, [showMax, balance])
 
   return (
     <div className='rounded-[12px] p-16 dark:bg-[#131a2a] bg-[#f5f6fc]'>
@@ -30,7 +37,7 @@ const TokenInput:FC<TokenInputProps> = (props) => {
       </div>
       {balance && <div className='text-right mb-10 dark:text-[#98a1c0] text-[#7780a0] font-bold'>
         Balance: {balance}
-        {showMax && <span className='text-[#5d61ff] ml-5' onClick={setMAX}>MAX</span>}
+        {showMaxButton && <span className='text-[#5d61ff] ml-5' onClick={setMAX}>MAX</span>}
       </div>}
     </div>
   )

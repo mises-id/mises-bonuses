@@ -1,33 +1,23 @@
-/*
- * @Author: lmk
- * @Date: 2022-05-05 20:50:25
- * @LastEditTime: 2022-06-23 12:04:18
- * @LastEditors: lmk
- * @Description:
- */
 import { Toast } from 'antd-mobile';
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 const codeMessage: Record<number, string> = {
-  200: '服务器成功返回请求的数据。',
-  201: '新建或修改数据成功。',
-  202: '一个请求已经进入后台排队（异步任务）。',
-  204: '删除数据成功。',
-  400: '发出的请求有错误，服务器没有进行新建或修改数据的操作。',
-  401: '用户没有权限（令牌、用户名、密码错误）。',
-  403: '用户得到授权，但是访问是被禁止的。',
-  404: '发出的请求针对的是不存在的记录，服务器没有进行操作。',
-  406: '请求的格式不可得。',
-  410: '请求的资源被永久删除，且不会再得到的。',
-  422: '当创建一个对象时，发生一个验证错误。',
-  500: '服务器发生错误，请检查服务器。',
-  502: '网关错误。',
-  503: '服务不可用，服务器暂时过载或维护。',
-  504: '网关超时。',
+  200: 'The server successfully returned the requested data.',
+  201: 'The data was created or modified successfully.',
+  202: 'A request has been queued for background processing (asynchronous task).',
+  204: 'The data was deleted successfully.',
+  400: 'The request was incorrect and the server did not create or modify any data.',
+  401: 'The user is not authorized (token, username, password incorrect).',
+  403: 'The user is authorized but access is forbidden.',
+  404: 'The requested record does not exist and the server did not perform any operation.',
+  406: 'The requested format is not available.',
+  410: 'The requested resource has been permanently deleted and will not be available again.',
+  422: 'A validation error occurred when creating an object.',
+  500: 'An error occurred on the server, please check the server.',
+  502: 'Bad gateway error.',
+  503: 'The service is temporarily unavailable, the server is overloaded or under maintenance.',
+  504: 'Gateway timeout.',
 };
-// /**
-//  * @zh-CN 异常处理程序
-//  * @en-US Exception handler
-//  */
+
 const errorHandler = (error: {
   response: AxiosResponse;
   config: AxiosRequestConfig;
@@ -52,12 +42,8 @@ const errorHandler = (error: {
 };
 const request = axios.create({
   headers: { 'Content-Type': 'application/json' },
-  // baseURL: 'http://hjqqa.natapp1.cc', //胡
-  // baseURL: 'http://scyjkj.natapp1.cc', // 吴
-  // baseURL: 'http://8.140.29.27:9001',
-  // baseURL: 'http://api2.cdpsyl.cc',
-  baseURL: 'http://api.cdpsyl.cc',
-  timeout: 10000,
+  baseURL: 'https://api.test.mises.site/api',
+  timeout: 50000,
 });
 
 // 添加请求拦截器
@@ -75,7 +61,7 @@ request.interceptors.request.use(
 // 添加响应拦截器
 request.interceptors.response.use((response: AxiosResponse) => {
   const { data } = response;
-  if (data.code === '200') return data.data;
+  if (data.code === 0) return data;
   Toast.show(data.msg);
   return Promise.reject(data.data);
 }, errorHandler);

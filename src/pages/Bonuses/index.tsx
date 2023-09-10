@@ -5,6 +5,7 @@ import { Button, Popup } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
 import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo } from '@/utils'
+import { signin } from '@/api'
 const { useChainId, useAccounts, useIsActivating, useIsActive, useProvider } = hooks
 
 function Bonuses() {
@@ -24,6 +25,20 @@ function Bonuses() {
   const isActive = useIsActive()
 
   const provider = useProvider()
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log('accounts', accounts)
+      if(accounts?.length) {
+        // signMsg().then(auth => {
+        //   signin(auth).then(res=> {
+        //     console.log(res)
+        //   })
+        // })
+      }
+    }, 1000);
+  }, [accounts])
+  
   // const ENSNames = useENSNames(provider)
 
   const fetchBonusesBalance = () => {

@@ -4,8 +4,12 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo } from '@/utils'
+import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, getErc20Balance } from '@/utils'
 import { useMisesWallet } from '@/hooks/useMisesWallet'
+import { getAmount } from '@/hooks/useInitialBankBalance'
+import { useRequest } from 'ahooks'
+import { Coins } from '@terra-money/terra.js'
+import { useLCDClient } from '@/hooks/uselcdClient'
 const { useChainId, useAccounts, useIsActivating, useIsActive } = hooks
 
 function MISToMB() {
@@ -14,7 +18,6 @@ function MISToMB() {
   const [formValue, setformValue] = useState<string | undefined>('')
   const [toValue, settoValue] = useState<string | undefined>('')
 
-  const [formBalance, setformBalance] = useState<string | undefined>('')
   const [toBalance, settoBalance] = useState<string | undefined>('')
 
 
@@ -30,20 +33,25 @@ function MISToMB() {
   // const provider = useProvider()
   // const ENSNames = useENSNames(provider)
 
-  const fetchBonusesBalance = () => {
-    console.log("fetchBonusesBalance")
-    setformBalance('123')
-  }
+  const lcd = useLCDClient()
+  const { data: misBalance } = useRequest(async () => {
+    if (!misesAccount) return new Coins()
+    const [coins] = await lcd.bank.balance(misesAccount)
+    return coins
+  }, {
+    retryCount: 10,
+    refreshDeps: [misesAccount],
+    staleTime: Infinity
+  })
 
-  const fetchMBBalance = () => {
-    console.log("fetchMBBalance")
-    settoBalance('456 MB')
-  }
-
+  const balance = getAmount(misBalance!, "umis")
+  
   useEffect(() => {
     if(accounts && accounts.length) {
-      fetchBonusesBalance()
-      fetchMBBalance()
+      // fetchMisBalance()
+      getErc20Balance(accounts[0]).then(res => {
+        settoBalance(`${res?.formatted || 0} MB`)
+      })
     }
   }, [accounts])
 
@@ -206,8 +214,8 @@ function MISToMB() {
           onChange={(e) => {
             setformValue(e)
           }}
-          showMax
-          balance={formBalance}
+          showMax={true}
+          balance={balance}
         />
         <div className='h-35 w-35 rounded-[12px] mx-auto my-[-18px] border-4 border-solid relative z-10 border-[#fff] dark:border-[#0d111c] dark:bg-[#293249] bg-[#e8ecfb] flex items-center justify-center'>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#98A1C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>

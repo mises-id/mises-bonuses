@@ -1,7 +1,14 @@
+import { usePageValue } from '@/components/pageProvider';
 import { NavBar, List, Button } from 'antd-mobile'
 import React from 'react'
 
 function Mining() {
+  const { accountData } = usePageValue();
+
+  const fetchAds = () => {
+    
+  }
+  
   return (
     <div>
       <NavBar className={`fixed left-0 right-0 top-0 z-10`} backArrow={false}>
@@ -35,12 +42,10 @@ function Mining() {
                 <Button
                   color='primary'
                   size='small'
-                  onClick={() => {
-
-                  }}>
+                  onClick={fetchAds}>
                   <span className='text-12'>GO</span>
                 </Button>
-              } description='0/10 watched today'>
+              } description={`0/${accountData?.AdMining.limit_per_day || 10} watched today`}>
                 <span className='mb-10 block dark:text-white text-gray-600'>
                   Watch rewarded video ads
                 </span>
