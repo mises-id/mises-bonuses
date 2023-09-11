@@ -289,6 +289,10 @@
   padding: 20px;
 }
 
+.p-10 {
+  padding: 10px;
+}
+
 .py-4 {
   padding-top: 4px;
   padding-bottom: 4px;
@@ -350,6 +354,14 @@
   padding-top: 55px;
 }
 
+.pt-10 {
+  padding-top: 10px;
+}
+
+.pt-12 {
+  padding-top: 12px;
+}
+
 .text-right {
   text-align: right;
 }
@@ -384,6 +396,18 @@
 
 .leading-7 {
   line-height: 1.75rem;
+}
+
+.leading-4 {
+  line-height: 1rem;
+}
+
+.leading-8 {
+  line-height: 2rem;
+}
+
+.leading-6 {
+  line-height: 1.5rem;
 }
 
 .text-\[\#7780a0\] {

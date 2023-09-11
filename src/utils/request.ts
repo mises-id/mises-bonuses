@@ -1,5 +1,6 @@
 import { Toast } from 'antd-mobile';
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+import { getToken } from '.';
 const codeMessage: Record<number, string> = {
   200: 'The server successfully returned the requested data.',
   201: 'The data was created or modified successfully.',
@@ -49,6 +50,8 @@ const request = axios.create({
 // 添加请求拦截器
 request.interceptors.request.use(
   (config: AxiosRequestConfig) => {
+    if(!config.headers) config.headers = {};
+    if(getToken()) config.headers["Authorization"] = `Bearer ${getToken()}`
     return config;
   },
   function (error:any) {

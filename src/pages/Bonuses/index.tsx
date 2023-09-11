@@ -1,20 +1,28 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import './index.less'
 import TokenInput from '@/components/tokenInput'
-import { Button, Popup } from 'antd-mobile'
+import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo } from '@/utils'
-import { signin } from '@/api'
+import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken } from '@/utils'
+import { fetchBonusCount, redeemBonusCount, signin } from '@/api'
+import { useBoolean, useRequest } from 'ahooks'
+import { usePageValue } from '@/components/pageProvider'
+import BigNumber from 'bignumber.js'
 const { useChainId, useAccounts, useIsActivating, useIsActive, useProvider } = hooks
 
 function Bonuses() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
 
+  const [loading, {setTrue, setFalse}] = useBoolean(false)
+
+  const [errorTxt, seterrorTxt] = useState('')
+
   const [formValue, setformValue] = useState<string | undefined>('')
   const [toValue, settoValue] = useState<string | undefined>('')
 
-  const [formBalance, setformBalance] = useState<string | undefined>('')
+  // const [formBalance, setformBalance] = useState<string | undefined>('')
+  const token = getToken()
   const [toBalance, settoBalance] = useState<string | undefined>('')
 
   const { connector } = useWeb3React();
@@ -26,59 +34,101 @@ function Bonuses() {
 
   const provider = useProvider()
 
+  const currentAccount = useMemo(() => {
+    if(accounts?.length) {
+      return accounts[0]
+    }
+    return ''
+  }, [accounts])
+
   useEffect(() => {
     setTimeout(() => {
-      console.log('accounts', accounts)
-      if(accounts?.length) {
-        // signMsg().then(auth => {
-        //   signin(auth).then(res=> {
-        //     console.log(res)
-        //   })
-        // })
+      if(currentAccount && !token) {
+        signMsg().then(auth => {
+          signin(auth).then(res=> {
+            localStorage.setItem('token', res.token)
+            run()
+          })
+        })
       }
     }, 1000);
-  }, [accounts])
+    // eslint-disable-next-line
+  }, [currentAccount])
+
+  useEffect(() => {
+    run()
+    // eslint-disable-next-line
+  }, [])
+  
   
   // const ENSNames = useENSNames(provider)
-
-  const fetchBonusesBalance = () => {
-    console.log("fetchBonusesBalance")
-    setformBalance('123')
-  }
+  const { data: formBalance, run, refresh } = useRequest(async () => {
+    if(!token) return '';
+    try {
+      const data = await fetchBonusCount()
+      return data.bonus
+    } catch (error) {
+      return ''
+    }
+  }, {
+    retryCount: 3,
+    manual: true
+  })
 
   const fetchMBBalance = () => {
     console.log("fetchMBBalance")
-    settoBalance('456 MB')
+    getErc20Balance(currentAccount).then(res => {
+      settoBalance(`${res?.formatted || 0} MB`)
+    })
   }
 
   useEffect(() => {
-    if(accounts && accounts.length) {
-      fetchBonusesBalance()
+    if(currentAccount) {
       fetchMBBalance()
     }
-  }, [accounts])
+    // eslint-disable-next-line
+  }, [currentAccount])
   
 
   // button state text
   const ButtonText = useMemo(() => {
     if (isActivating) {
-      return 'Connecting wallet ...'
+      return 'Connecting wallet...'
     }
 
     if (!isActive) {
       return 'Connect Wallet'
     }
 
+    if(!formValue && !toValue) {
+      return 'Enter an amount'
+    }
+
+    if(errorTxt) {
+      return errorTxt
+    }
+
     return 'Redeem'
-  }, [isActive, isActivating])
+  }, [isActive, isActivating, errorTxt, formValue, toValue])
 
   // button status 
   const buttonDisabled = useMemo(() => {
     if (isActivating) {
       return true;
     }
+    if(!isActive) {
+      return false;
+    }
+
+    if(errorTxt) {
+      return true
+    }
+
+    if(!formValue && !toValue) {
+      return true
+    }
     return false;
-  }, [isActivating])
+  }, [isActivating, errorTxt, formValue, toValue, isActive])
 
   const connectWallet = async () => {
     try {
@@ -124,8 +174,7 @@ function Bonuses() {
       const address = accounts[0]
       const sigMsg = `address=${address}&nonce=${timestamp}`
       const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
-      const getEncryptionPublicKey = await provider?.send('eth_getEncryptionPublicKey', [address, sigMsg])
-      const auth = `address=${address}&nonce=${timestamp}&pubkey=${getEncryptionPublicKey}&sig=${personalSignMsg}`
+      const auth = `${sigMsg}&sig=${personalSignMsg}`
       return auth
     }
     return Promise.reject({
@@ -138,19 +187,21 @@ function Bonuses() {
     setformValue('')
     settoValue('')
     setshowConfirmDialog(true)
+    refresh()
+    fetchMBBalance()
+    setFalse()
   }
 
   const swap = async () => {
     try {
       if(toValue && formValue) {
-        const auth = await signMsg();
-        console.log(auth)
+        setTrue()
+        await redeemBonusCount(Number(formValue))
         resetData()
       }else {
 
       }
     } catch (error) {
-
     }
   }
 
@@ -160,8 +211,17 @@ function Bonuses() {
       await checkChainId();
       await checkUserAddress();
       await swap()
-    } catch (error) {
+    } catch (error: any) {
+      setFalse()
 
+      if(error && error.code) {
+        if(error.code === ErrorCode.pleaseWait || error.name === "AxiosError") {
+          Toast.show(error.message)
+          return
+        }
+      }
+      console.log(error)
+      
     }
   }
 
@@ -177,6 +237,37 @@ function Bonuses() {
     setshowConfirmDialog(false)
   }
 
+  const { accountData } = usePageValue()
+
+  const replaceValue = (val: string, decimals: number = 18) => {
+    const valueRegex = new RegExp( `^\\d*[.]?\\d{0,${decimals}}`,'g')
+    return val.replace(/[^\d^.?]+/g, "")?.replace(/^0+(\d)/, "$1")?.replace(/^\./, "0.")?.match(valueRegex)?.[0] || ""
+  }
+
+  const formValueChange = (e: string) => {
+    setformValue(replaceValue(e))
+
+    const compared = BigNumber(formBalance || '0').comparedTo(e)
+
+    if(compared === -1) {
+      seterrorTxt('Insufficient balance')
+      return 
+    }
+
+    if(accountData?.Bonus?.min_redeem_bonus_amount && e) {
+      const redeemCompared = BigNumber(e || '0').comparedTo(accountData?.Bonus.min_redeem_bonus_amount)
+      if(redeemCompared === -1) {
+        seterrorTxt('Insufficient bonuses')
+        return 
+      }
+    }
+    seterrorTxt('')
+    if(accountData?.Bonus?.bonus_to_mb_rate && e) {
+      settoValue(BigNumber(e).multipliedBy(accountData?.Bonus.bonus_to_mb_rate).toString())
+      return
+    }
+    settoValue('')
+  }
 
   return (
     <div>
@@ -188,9 +279,7 @@ function Bonuses() {
         <TokenInput
           coinInfo={BonusesInfo}
           value={formValue}
-          onChange={(e) => {
-            setformValue(e)
-          }}
+          onChange={formValueChange}
           showMax
           balance={formBalance}
         />
@@ -200,15 +289,16 @@ function Bonuses() {
         <TokenInput 
           coinInfo={MBCoinInfo}
           value={toValue}
-          onChange={(e) => {
-            settoValue(e)
-          }}
+          readOnly
           balance={toBalance}
+          account={currentAccount}
         />
         <div className='mt-10'>
           <Button
             block
+            loading={loading}
             disabled={buttonDisabled}
+            loadingText="Redeeming"
             style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", 'padding': '12px', borderRadius: 12 }}
             onClick={buttonClick}
           >

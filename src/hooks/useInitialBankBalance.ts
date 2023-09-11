@@ -68,6 +68,5 @@ export const queryKey = mirror({
   /* coin */
 export const getAmount = (coins: Coins, denom: Denom, fallback = "0") => {
   if(!coins) return fallback;
-  console.log(coins.get(denom))
   return coins.get(denom)?.amount.toString() ?? fallback
 }

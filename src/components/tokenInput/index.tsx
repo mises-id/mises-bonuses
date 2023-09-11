@@ -1,3 +1,4 @@
+import { shortenAddress } from '@/utils';
 import { CoinInfo } from '@/utils/types';
 import { Input } from 'antd-mobile'
 import { InputProps } from 'antd-mobile/es/components/input'
@@ -6,9 +7,10 @@ interface TokenInputProps extends InputProps {
   balance?: string;
   coinInfo?: CoinInfo;
   showMax?: boolean;
+  account?: string
 }
 const TokenInput:FC<TokenInputProps> = (props) => {
-  const { balance, coinInfo, showMax, ...rest } = props
+  const { balance, coinInfo, showMax, account, ...rest } = props
   const setMAX = () => {
     if(balance && balance !== "0") {
       props.onChange?.(balance)
@@ -35,10 +37,13 @@ const TokenInput:FC<TokenInputProps> = (props) => {
           </div>
         </div>
       </div>
-      {balance && <div className='text-right mb-10 dark:text-[#98a1c0] text-[#7780a0] font-bold'>
-        Balance: {balance}
-        {showMaxButton && <span className='text-[#5d61ff] ml-5' onClick={setMAX}>MAX</span>}
-      </div>}
+      <div className='flex justify-between'>
+        { account && <p className='text-gray-500'>Address: {shortenAddress(account)}</p>}
+        {balance && <div className='flex-1 text-right dark:text-[#98a1c0] text-[#7780a0] font-bold'>
+          Balance: {balance}
+          {showMaxButton && <span className='text-[#5d61ff] ml-5' onClick={setMAX}>MAX</span>}
+        </div>}
+      </div>
     </div>
   )
 }
