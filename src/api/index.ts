@@ -2,11 +2,11 @@ import request from '@/utils/request'
 
 
 export interface accountData {
-  "Bonus": {
+  "bonus": {
     "bonus_to_mb_rate": number,
     'min_redeem_bonus_amount': number,
   },
-  "AdMining": {
+  "ad_mining": {
     "limit_per_day": number
   },
   "mb_airdrop": {
@@ -44,7 +44,7 @@ export async function signin(auth: string): Promise<{
 /**
  * fetch bonus count for user account
  */
-export async function fetchBonusCount(): Promise<{"bonus": string}> {
+export async function fetchBonusCount(): Promise<{"bonus": number}> {
   const { data } = await request({
     url: '/v1/mining/bonus'
   })
@@ -83,11 +83,7 @@ export async function checkMisesAccount(misesid: string): Promise<checkMBairdrop
 }
 
 export interface paramsData {
-  receive_address: string,
-  nonce: string,
-  misesid: string,
-  pubkey: string,
-  sig: string
+  receive_address: string
 }
 /**
  * claim $MB
@@ -96,6 +92,20 @@ export async function claimAirdrop(params: paramsData): Promise<void> {
   const { data } = await request({
     url: `/v1/mb_airdrop/claim`,
     params
+  })
+  return data
+}
+
+/**
+ * fetch data for me
+ */
+export async function fetchAdMiningData(): Promise<{
+  "eth_address": string,
+  "limit_per_day": number,
+  "today_bonus_count": number
+}> {
+  const { data } = await request({
+    url: `/v1/ad_mining/me`
   })
   return data
 }

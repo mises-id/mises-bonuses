@@ -120,12 +120,6 @@ export const getErc20Balance = async (address: string) => {
     } catch (error) {
       return Promise.reject(error);
     }
-    
-    // return fetchBalance({
-    //   address: address,
-    //   token: tokenAddress,
-    //   chainId: chainId
-    // })
   }
 }
 
@@ -148,4 +142,18 @@ export function shortenAddress(
   return `${address.slice(0, prefix)}...${address.slice(
     -TRUNCATED_ADDRESS_END_CHARS,
   )}`;
+}
+
+
+export function Uint8ArrayToHexString(uint8Array: Uint8Array) {
+  const arrayBuffer = uint8Array.buffer;
+  const byteArray = new Uint8Array(arrayBuffer);
+  let hexString = '';
+  
+  for (let i = 0; i < byteArray.length; i++) {
+    const hex = byteArray[i].toString(16).padStart(2, '0');
+    hexString += hex;
+  }
+  
+  return hexString;
 }

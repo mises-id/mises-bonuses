@@ -29,7 +29,7 @@ function MISToMB() {
 
   const { connector } = useWeb3React();
 
-  const { activate: misesProviderActivate, isActivating: misesWalletIsActivating, account: misesAccount, checkAccountData, misesAccountData, sendMisTx } = useMisesWallet();
+  const { activate: misesProviderActivate, isActivating: misesWalletIsActivating, account: misesAccount, checkAccountData, misesAccountData, sendMisTx, refreshLimit } = useMisesWallet();
   const chainId = useChainId()
   const accounts = useAccounts()
   const isActivating = useIsActivating()
@@ -58,14 +58,30 @@ function MISToMB() {
    // eslint-disable-next-line
   }, [misBalance])
   
+  const setClaimReceiveAddress = async () => {
+    if(misesAccount && accounts?.length && misesAccountData?.pubkey) {
+      try {
+        await claimAirdrop({receive_address: accounts[0]})
+      } catch (error: any) {
+        if(error.response && error.response.status === 403 && error.response.data.code === 403002) {
+          localStorage.removeItem('token');
+          misesProviderActivate()
+        }
+        return Promise.reject(error)
+      }
+    }
+  }
+
   useEffect(() => {
     if(accounts && accounts.length) {
-      console.log(accounts[0])
       getErc20Balance(accounts[0]).then(res => {
-        settoBalance(`${res?.formatted || 0} MB`)
+        settoBalance(`${res?.formatted || 0}`)
       })
+      setClaimReceiveAddress()
     }
+    // eslint-disable-next-line
   }, [accounts])
+
 
   const stepStatus = useMemo(() => {
     if(!misesAccount) {
@@ -82,14 +98,14 @@ function MISToMB() {
 
   const stepStatusText = useMemo(() => {
     if(stepStatus === 1) {
-      return 'Connect wallet for MIS';
+      return 'Step1: Connect wallet for MIS';
     }
 
     // ethereum account connected
     if(stepStatus === 2) {
-      return 'Connect wallet for MB';
+      return 'Step2: Connect wallet for MB';
     }
-    if(!formValue && !toValue) {
+    if((!formValue && !toValue) || (formValue && BigNumber(formValue).isZero())) {
       return 'Enter an amount'
     }
     return 'Redeem';
@@ -118,7 +134,7 @@ function MISToMB() {
       return true;
     }
 
-    if(!formValue && !toValue && misesAccount && accounts) {
+    if((!formValue && !toValue && misesAccount && accounts) || (formValue && BigNumber(formValue).isZero())) {
       return true
     }
 
@@ -160,7 +176,7 @@ function MISToMB() {
     }
     return Promise.reject({
       code: 9998,
-      message: 'Invalid address'
+      message: 'Check user address failed'
     })
   }
 
@@ -170,21 +186,7 @@ function MISToMB() {
     setshowConfirmDialog(true)
     setFalse()
     refreshMis()
-  }
-
-  const swap = async () => {
-    try {
-      if(toValue && formValue && misesAccount && accounts?.length && misesAccountData?.pubkey && misesAccountData.nonce) {
-        await sendMisTx(formValue)
-        await claimAirdrop({
-          receive_address: accounts[0],
-          misesid: misesAccount,
-          ...misesAccountData
-        })
-      }
-    } catch (error) {
-      return Promise.reject(error)
-    }
+    refreshLimit()
   }
 
   const buttonClick = async () => {
@@ -198,28 +200,27 @@ function MISToMB() {
       if(stepStatus === 2) {
         await connectWallet();
         await checkChainId();
-        await checkUserAddress();
         return;
       }
 
       // redeem token
       setTrue();
       if(stepStatus === 3) {
-        await swap()
+        await checkUserAddress()
+        await setClaimReceiveAddress()
+        if(formValue) {
+          const aaa = await sendMisTx(formValue)
+          console.log(aaa)
+        }
         resetData()
       }
       
     } catch (error: any) {
       setFalse()
-
-      if(error && error.code) {
-        // if(error.code === ErrorCode.notFoundMises) {
-        //   // show not found error message tips
-        //   Toast.show(error.message)
-        // }
+      if(error.message) {
         Toast.show(error.message)
       }
-      console.log(error, 'error')
+      console.log(error.message, 'error')
     }
   }
 
@@ -243,32 +244,42 @@ function MISToMB() {
   }
 
   const formValueChange = (e: string) => {
-    setformValue(replaceValue(e))
-    const compared = BigNumber(balance || '0').comparedTo(e)
-    settoValue(replaceValue(e))
+    const value = replaceValue(e)
+    setformValue(value)
+    settoValue(value)
+    const compared = BigNumber(balance || '0').comparedTo(value)
     if(compared === -1) {
       seterrorTxt('Insufficient balance')
       return
     }
 
-    if(accountData?.mb_airdrop?.min_redeem_mis_amount && e) {
-      const compared = BigNumber(e).comparedTo(accountData?.mb_airdrop?.min_redeem_mis_amount)
+    if(accountData?.mb_airdrop?.min_redeem_mis_amount && value) {
+      const limit = formatAmount(`${accountData?.mb_airdrop?.min_redeem_mis_amount}`, 6)
+      const compared = BigNumber(value).comparedTo(limit)
       if(compared === -1) {
         seterrorTxt(`Minimum redeem ${accountData?.mb_airdrop?.min_redeem_mis_amount} MIS`)
         return
       }
     }
 
-    if(checkAccountData?.current_airdrop_limit && e) {
-      const redeemCompared = BigNumber(checkAccountData?.current_airdrop_limit).comparedTo(e)
+    if(checkAccountData?.current_airdrop_limit && value) {
+      const limit = formatAmount(`${checkAccountData.current_airdrop_limit}`, 6)
+      const redeemCompared = BigNumber(limit).comparedTo(value)
       if(redeemCompared === -1) {
-        seterrorTxt(`Exceeded the exchange limit, maximum exchange amount is ${formatAmount(`${checkAccountData.total_airdrop_limit}`, 6)}MIS, already exchanged ${formatAmount(`${checkAccountData.current_airdrop_limit}`, 6)}MIS.`)
+        seterrorTxt(`Exceeded the exchange limit, maximum exchange amount is ${formatAmount(`${checkAccountData.total_airdrop_limit}`, 6)}MIS, already exchanged ${limit}MIS.`)
         return 
       }
     }
     seterrorTxt('')
   }
 
+  const Extra = () => {
+    if(checkAccountData?.current_airdrop_limit) {
+      const limit = formatAmount(`${checkAccountData?.current_airdrop_limit || 0}`, 6)
+      return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
+    }
+    return null;
+  }
   return (
     <div>
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
@@ -282,6 +293,7 @@ function MISToMB() {
           onChange={formValueChange}
           showMax={true}
           balance={balance}
+          extra={<Extra />}
           account={misesAccount}
         />
         <div className='h-35 w-35 rounded-[12px] mx-auto my-[-18px] border-4 border-solid relative z-10 border-[#fff] dark:border-[#0d111c] dark:bg-[#293249] bg-[#e8ecfb] flex items-center justify-center'>
@@ -300,7 +312,7 @@ function MISToMB() {
             loading={loading}
             disabled={buttonDisabled}
             loadingText="Sent TX"
-            style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", 'padding': '12px', borderRadius: 12 }}
+            style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", 'padding': '12px', borderRadius: 12, "--text-color": 'white' }}
             onClick={buttonClick}
           >
             <span className='text-[white] text-18'>{ButtonText}</span>

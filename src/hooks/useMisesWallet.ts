@@ -1,5 +1,5 @@
-import { checkMisesAccount } from "@/api";
-import { misesBurnAddress } from "@/utils";
+import { checkMisesAccount, signin } from "@/api";
+import { Uint8ArrayToHexString, misesBurnAddress } from "@/utils";
 import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
@@ -42,7 +42,7 @@ export function useMisesWallet() {
   } | undefined>(undefined)
   const [isActivating, setisActivating] = useState(true);
 
-  const { data: checkAccountData, run } = useRequest(checkMisesAccount, {
+  const { data: checkAccountData, run, refresh } = useRequest(checkMisesAccount, {
     retryCount: 3,
     manual: true
   })
@@ -52,22 +52,43 @@ export function useMisesWallet() {
       if (provider) {
         setmisesProvider(provider)
         setisActivating(false)
+        checkConnect(provider)
+        window.addEventListener("mises_keystorechange", async () => {
+          activate()
+        })
       }
     })
+    // eslint-disable-next-line
   }, [])
+
+  const checkConnect = async (provider: any) => {
+    const getMisesAccount = localStorage.getItem("misesAccount");
+    const isUnlock = await provider.isUnlocked()
+    console.log(isUnlock, getMisesAccount)
+    if (getMisesAccount && isUnlock) {
+      activate(provider)
+    }
+  }
 
   const chainId = 'mainnet';
 
-  const activate = async () => {
+  const activate = async (provider = misesProvider) => {
     try {
-      if (misesProvider) {
-        await misesProvider.enable(chainId);
+      if (provider) {
+        await provider.enable(chainId);
 
         const result: {
           address: string,
           auth: string
-        } = await misesProvider.misesAccount()
+        } = await provider.misesAccount()
         setaccount(result.address)
+        signin(result.auth).then(res=> {
+          localStorage.setItem('token', res.token)
+          // localStorage.setItem('ethAccount', currentAccount)
+          // refresh()
+        })
+
+        localStorage.setItem('misesAccount', result.address)
         const params = new URLSearchParams(`?${result.auth}`)
         if (params.get('pubkey') && params.get('sig') && params.get('nonce')) {
           setmisesAccountData({
@@ -90,62 +111,76 @@ export function useMisesWallet() {
   }
 
   const lcd = useLCDClient()
-
+  
   const sendMisTx = async (
     value: string
   ) => {
     if (!account) {
-      return Promise.reject();
+      return Promise.reject({
+        code: 9998,
+        message: 'Not found Mises account'
+      });
     }
 
-    const sendValue = BigNumber(value).multipliedBy(BigNumber(10).pow(6)).toString()
-    const accountInfo = await lcd.auth.accountInfo(account)
-    const estimatedGas = 2000000
+    try {
+      const sendValue = BigNumber(value).multipliedBy(BigNumber(10).pow(6)).toString()
+      const accountInfo = await lcd.auth.accountInfo(account)
+      const estimatedGas = 2000000
 
-    const gasAmount = BigNumber(estimatedGas)
-      .times(0.0001)
-      .integerValue(BigNumber.ROUND_CEIL)
-      .toString()
-    
-    const gasFee = { amount: gasAmount, denom: 'umis' }
-    const gasCoins = new Coins([Coin.fromData(gasFee)])
-    const fee = new Fee(estimatedGas, gasCoins)
-    const signTx = [new MsgSend(account, misesBurnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
-    
-    const doc = new SignDoc(
-      chainId,
-      accountInfo.getAccountNumber(),
-      accountInfo.getSequenceNumber(),
-      new AuthInfo([], fee),
-      new TxBody(signTx, '')
-    )
-    await misesProvider.enable(chainId);
+      const gasAmount = BigNumber(estimatedGas)
+        .times(0.0001)
+        .integerValue(BigNumber.ROUND_CEIL)
+        .toString()
+      console.log(gasAmount)
+      
+      const gasFee = { amount: gasAmount, denom: 'umis' }
+      const gasCoins = new Coins([Coin.fromData(gasFee)])
+      const fee = new Fee(estimatedGas, gasCoins)
+      const signTx = [new MsgSend(account, misesBurnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
+      
+      const doc = new SignDoc(
+        chainId,
+        accountInfo.getAccountNumber(),
+        accountInfo.getSequenceNumber(),
+        new AuthInfo([], fee),
+        new TxBody(signTx, '')
+      )
+      await misesProvider.enable(chainId);
 
-    await misesProvider.signAmino(chainId, account, doc.toAmino(), {})
+      await misesProvider.signAmino(chainId, account, doc.toAmino(), {})
 
-    const txString = signTx.map((val: Msg) => {
-      const msg = JSON.parse(val.toJSON())
-      const newMsg = {} as { [key: string]: any }
-      for (const key in msg) {
-        const labelKey = key as string
-        newMsg[`${toHump(labelKey)}`] = msg[key]
-      }
-      delete newMsg["@type"]
-      return {
-        typeUrl: msg["@type"],
-        value: newMsg,
-      }
-    })
+      const txString = signTx.map((val: Msg) => {
+        const msg = JSON.parse(val.toJSON())
+        const newMsg = {} as { [key: string]: any }
+        for (const key in msg) {
+          const labelKey = key as string
+          newMsg[`${toHump(labelKey)}`] = msg[key]
+        }
+        delete newMsg["@type"]
+        return {
+          typeUrl: msg["@type"],
+          value: newMsg,
+        }
+      })
 
-    return await misesProvider.staking({
-      msgs: txString,
-      gasLimit: fee.gas_limit,
-      gasFee: [gasFee],
-    })
+      return await misesProvider.staking({
+        msgs: txString,
+        gasLimit: fee.gas_limit,
+        gasFee: [gasFee],
+      })
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
-  const refreshMisesAccount = () => {
+  const signMessage = async (signData: string) => {
+    try {
+      const msg: Uint8Array = await misesProvider.signEthereum(chainId, account, signData, 'message');
     
+      return `${Uint8ArrayToHexString(msg)}`;
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   return {
@@ -156,6 +191,7 @@ export function useMisesWallet() {
     sendMisTx,
     checkAccountData,
     misesAccountData,
-    refreshMisesAccount
+    signMessage,
+    refreshLimit: refresh
   }
 }

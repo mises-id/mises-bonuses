@@ -1,13 +1,28 @@
-import { usePageValue } from '@/components/pageProvider';
+import { fetchAdMiningData } from '@/api';
+import { getToken } from '@/utils';
+import { useRequest } from 'ahooks';
 import { NavBar, List, Button } from 'antd-mobile'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 function Mining() {
-  const { accountData } = usePageValue();
+  const token = getToken()
 
   const fetchAds = () => {
     
   }
+
+  const { data: adMiningData, run } = useRequest(fetchAdMiningData, {
+    retryCount: 3,
+    manual: true,
+  })
+
+  useEffect(() => {
+    if(token) {
+      run()
+    }
+    // eslint-disable-next-line
+  }, [token])
+  
   
   return (
     <div>
@@ -45,7 +60,7 @@ function Mining() {
                   onClick={fetchAds}>
                   <span className='text-12'>GO</span>
                 </Button>
-              } description={`0/${accountData?.AdMining.limit_per_day || 10} watched today`}>
+              } description={`${adMiningData?.today_bonus_count || 0}/${adMiningData?.limit_per_day || 10} watched today`}>
                 <span className='mb-10 block dark:text-white text-gray-600'>
                   Watch rewarded video ads
                 </span>

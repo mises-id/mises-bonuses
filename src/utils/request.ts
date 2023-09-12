@@ -26,17 +26,17 @@ const errorHandler = (error: {
   const { response, config } = error;
   if (response && response.status) {
     const errorText =
-      response?.data.msg || codeMessage[response.status] || response.statusText;
+      response?.data.message || codeMessage[response.status] || response.statusText;
     // const { status } = response;
     Toast.show(errorText);
     return Promise.reject(error);
   }
   if (!response) {
-    Toast.show('你的网络不正常，无法连接到服务器');
+    Toast.show('Bad gateway error.');
     return Promise.reject(error);
   }
   if (config) {
-    Toast.show('出错啦');
+    Toast.show('Unknown error');
   }
   // return response;
   return Promise.reject(error);
@@ -65,6 +65,7 @@ request.interceptors.request.use(
 request.interceptors.response.use((response: AxiosResponse) => {
   const { data } = response;
   if (data.code === 0) return data;
+  
   Toast.show(data.msg);
   return Promise.reject(data.data);
 }, errorHandler);
