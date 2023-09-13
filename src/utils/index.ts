@@ -17,7 +17,7 @@ export enum ErrorCode {
 }
 
 export const MBCoinInfo = {
-  "address": '0x361377e6ec0b0e457356f0a6da1b1957df22ece9',
+  "address": '0x394373b15d0f5664ef13b2d052f7105a701cb745',
   "symbol": 'MB',
   "decimals": 18,
   "image": 'logo.png'

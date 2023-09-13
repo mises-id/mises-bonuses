@@ -75,7 +75,7 @@ function MISToMB() {
   useEffect(() => {
     if(accounts && accounts.length) {
       getErc20Balance(accounts[0]).then(res => {
-        settoBalance(`${res?.formatted || 0}`)
+        settoBalance(Number(res?.formatted).toFixed(6) || '')
       })
       setClaimReceiveAddress()
     }
@@ -280,6 +280,13 @@ function MISToMB() {
     }
     return null;
   }
+
+  const setMisMax = () => {
+    if(checkAccountData?.current_airdrop_limit) {
+      const value = BigNumber.min(balance, checkAccountData?.current_airdrop_limit)
+      formValueChange(value.toString())
+    }
+  }
   return (
     <div>
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
@@ -294,6 +301,7 @@ function MISToMB() {
           showMax={true}
           balance={balance}
           extra={<Extra />}
+          setMisMax={setMisMax}
           account={misesAccount}
         />
         <div className='h-35 w-35 rounded-[12px] mx-auto my-[-18px] border-4 border-solid relative z-10 border-[#fff] dark:border-[#0d111c] dark:bg-[#293249] bg-[#e8ecfb] flex items-center justify-center'>

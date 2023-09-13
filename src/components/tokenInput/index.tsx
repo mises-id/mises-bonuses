@@ -2,7 +2,7 @@ import { shortenAddress } from '@/utils';
 import { CoinInfo } from '@/utils/types';
 import { Input } from 'antd-mobile'
 import { InputProps } from 'antd-mobile/es/components/input'
-import BigNumber from 'bignumber.js';
+// import BigNumber from 'bignumber.js';
 import React, { FC, useMemo } from 'react'
 interface TokenInputProps extends InputProps {
   balance?: string;
@@ -10,15 +10,17 @@ interface TokenInputProps extends InputProps {
   showMax?: boolean;
   account?: string;
   extra?: string | React.ReactElement
-  symbol?: string
+  symbol?: string,
+  setMisMax?: () => void;
 }
 const TokenInput:FC<TokenInputProps> = (props) => {
-  const { balance, coinInfo, showMax, account, extra, symbol, ...rest } = props
+  const { balance, coinInfo, showMax, account, extra, symbol, setMisMax, ...rest } = props
   const setMAX = () => {
     if(balance && balance !== "0") {
       if(coinInfo?.symbol === "MIS") {
-        const max = BigNumber(balance).minus(0.003)
-        props.onChange?.(max.toString())
+        setMisMax?.()
+        // const max = BigNumber(balance).minus(0.003)
+        // props.onChange?.(max.toString())
       }else {
         props.onChange?.(balance)
       }
@@ -49,7 +51,7 @@ const TokenInput:FC<TokenInputProps> = (props) => {
         { account && <p className='flex-1 text-gray-500'>Address: {shortenAddress(account)}</p>}
         <div className='flex-1 text-right dark:text-[#98a1c0] text-[#7780a0]'>
           {balance!=='' ? <span>Balance: {balance}{symbol || coinInfo?.symbol}</span> : null }
-          {showMaxButton && <span className='text-[#5d61ff] ml-5' onClick={setMAX}>MAX</span>}
+          {showMaxButton && <span className='text-[#5d61ff] ml-5 cursor-pointer' onClick={setMAX}>MAX</span>}
         </div>
       </div>
       {extra}
