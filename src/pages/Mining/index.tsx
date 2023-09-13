@@ -165,7 +165,7 @@ function Mining() {
         }}>
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-            Your request for exchange has been duly acknowledged and is anticipated to be processed within several hours. Kindly monitor your wallet for updates.
+            Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.
           </p>
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[40%]' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
