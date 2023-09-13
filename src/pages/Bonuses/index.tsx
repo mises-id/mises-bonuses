@@ -46,6 +46,7 @@ function Bonuses() {
     const token = getToken()
     if(token) {
       setLoginTrue()
+      run()
     }
     // eslint-disable-next-line
   }, [])
@@ -71,12 +72,6 @@ function Bonuses() {
     }
     // eslint-disable-next-line
   }, [currentAccount, provider])
-
-  useEffect(() => {
-    run()
-    // eslint-disable-next-line
-  }, [])
-  
   
   // const ENSNames = useENSNames(provider)
   const { data: formBalance, run, refresh } = useRequest(async () => {
