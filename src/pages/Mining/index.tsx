@@ -20,7 +20,7 @@ function Mining() {
 
   const provider = useProvider()
   const [login, {setTrue: setLoginTrue, setFalse: setLoginFalse}] = useBoolean(false)
-
+  console.log(login)
   const currentAccount = useMemo(() => {
     if(accounts?.length) {
       return accounts[0]
