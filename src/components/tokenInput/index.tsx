@@ -36,7 +36,7 @@ const TokenInput:FC<TokenInputProps> = (props) => {
     <div className='rounded-[12px] p-16 dark:bg-[#131a2a] bg-[#f5f6fc]'>
       <div className='flex gap-10 items-center pb-5'>
         <div className='flex-1'>
-          <Input {...rest} style={{'--font-size': '30px'}}/>
+          <Input {...rest} placeholder='0' style={{'--font-size': '30px'}}/>
         </div>
         <div className='flex-none'>
           <div className='dark:bg-[#293249] bg-[#e8ecfb] flex gap-8 text-18 rounded-[24px] py-4 pl-8 pr-12 items-center justify-center'>

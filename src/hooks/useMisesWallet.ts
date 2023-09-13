@@ -73,6 +73,7 @@ export function useMisesWallet() {
   const chainId = 'mainnet';
 
   const activate = async (provider = misesProvider) => {
+    console.log(provider)
     try {
       if (provider) {
         await provider.enable(chainId);

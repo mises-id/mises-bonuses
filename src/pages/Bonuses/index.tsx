@@ -54,6 +54,10 @@ function Bonuses() {
     const oldConnectAddress = localStorage.getItem('ethAccount')
 
     if(currentAccount && oldConnectAddress !== currentAccount && provider) {
+      setformValue('')
+      settoValue('')
+      setLoginFalse()
+      localStorage.removeItem('token')
       signMsg().then(auth => {
         signin(auth).then(res=> {
           localStorage.setItem('token', res.token)
@@ -180,24 +184,28 @@ function Bonuses() {
   )
 
   const signMsg = async () => {
-    const timestamp = new Date().getTime();
-    if (accounts && accounts.length) {
-      const address = accounts[0]
-      const sigMsg = `address=${address}&nonce=${timestamp}`
-      const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
-      if(personalSignMsg) {
-        const auth = `${sigMsg}&sig=${personalSignMsg}`
-        return auth
+    try {
+      const timestamp = new Date().getTime();
+      if (accounts && accounts.length) {
+        const address = accounts[0]
+        const sigMsg = `address=${address}&nonce=${timestamp}`
+        const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
+        if(personalSignMsg) {
+          const auth = `${sigMsg}&sig=${personalSignMsg}`
+          return auth
+        }
+        return Promise.reject({
+          code: 9998,
+          message: 'Not found personal sign message'
+        })
       }
       return Promise.reject({
         code: 9998,
-        message: 'Not found personal sign message'
+        message: 'Invalid address'
       })
+    } catch (error) {
+      return Promise.reject(error)
     }
-    return Promise.reject({
-      code: 9998,
-      message: 'Invalid address'
-    })
   }
 
   const resetData = () => {
@@ -226,7 +234,8 @@ function Bonuses() {
   const checkSign = async () => {
     try {
       const token = localStorage.getItem('token')
-      if(!token) {
+      const oldConnectAddress = localStorage.getItem('ethAccount')
+      if(!token || currentAccount !== oldConnectAddress) {
         const auth = await signMsg()
         const res = await signin(auth)
         localStorage.setItem('token', res.token)

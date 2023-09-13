@@ -15,7 +15,8 @@
       --background-color: #000000;
       --icon-color: rgb(152, 161, 192);
       --adm-color-text: white;
-      --adm-color-background: #000000
+      --adm-color-background: #000000;
+      --adm-color-border: rgb(75, 85, 99)
     }
   }
   @media (prefers-color-scheme: light) {
@@ -27,6 +28,7 @@
       --icon-color: #7780a0;
       --adm-color-text: #0d111c;
       --adm-color-background:#f7f7f7;
+      --adm-color-border: #eee
     }
   }
   body{

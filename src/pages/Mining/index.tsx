@@ -1,27 +1,110 @@
-import { fetchAdMiningData } from '@/api';
+import { fetchAdMiningData, signin } from '@/api';
+import { usePageValue } from '@/components/pageProvider';
 import { getToken } from '@/utils';
-import { useRequest } from 'ahooks';
-import { NavBar, List, Button } from 'antd-mobile'
-import React, { useEffect } from 'react'
+import { useBoolean, useRequest } from 'ahooks';
+import { NavBar, List, Button, Popup } from 'antd-mobile'
+import React, { useEffect, useMemo, useState } from 'react'
+
+import { hooks } from '@/components/Web3Provider/metamask'
+import { useWeb3React } from '@web3-react/core';
+
+const { useAccounts, useProvider } = hooks
 
 function Mining() {
-  const token = getToken()
+  const [showDialog, setshowDialog] = useState(false)
+  const accounts = useAccounts()
+  // const isActivating = useIsActivating()
+  const { connector } = useWeb3React();
 
-  const fetchAds = () => {
-    
+  // const isActive = useIsActive()
+
+  const provider = useProvider()
+  const [login, {setTrue: setLoginTrue, setFalse: setLoginFalse}] = useBoolean(false)
+
+  const currentAccount = useMemo(() => {
+    if(accounts?.length) {
+      return accounts[0]
+    }
+    return ''
+  }, [accounts])
+
+  
+  const signMsg = async () => {
+    try {
+      const timestamp = new Date().getTime();
+      if (accounts && accounts.length) {
+        const address = accounts[0]
+        const sigMsg = `address=${address}&nonce=${timestamp}`
+        const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
+        if(personalSignMsg) {
+          const auth = `${sigMsg}&sig=${personalSignMsg}`
+          return auth
+        }
+        return Promise.reject({
+          code: 9998,
+          message: 'Not found personal sign message'
+        })
+      }
+      return Promise.reject({
+        code: 9998,
+        message: 'Invalid address'
+      })
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
-  const { data: adMiningData, run } = useRequest(fetchAdMiningData, {
+  const loginMises = () => {
+    const oldConnectAddress = localStorage.getItem('ethAccount')
+    if(currentAccount && oldConnectAddress !== currentAccount && provider) {
+      setLoginFalse()
+      localStorage.removeItem('token')
+      signMsg().then(auth => {
+        signin(auth).then(res=> {
+          localStorage.setItem('token', res.token)
+          localStorage.setItem('ethAccount', currentAccount)
+          refresh()
+          setLoginTrue()
+          setshowDialog(false)
+        }).catch(() => {
+          setLoginFalse()
+        })
+      })
+    }
+  }
+  useEffect(() => {
+    loginMises()
+    // eslint-disable-next-line
+  }, [currentAccount, provider])
+
+
+  const connectWallet = async () => {
+    await connector.activate()
+    loginMises()
+  }
+
+  const fetchAds = () => {
+    const token = getToken()
+    if (!token) {
+      setshowDialog(true)
+      return
+    }
+  }
+
+  const { accountData } = usePageValue()
+
+  const { data: adMiningData, run, refresh } = useRequest(fetchAdMiningData, {
     retryCount: 3,
     manual: true,
   })
 
   useEffect(() => {
+    const token = getToken()
     if(token) {
       run()
     }
     // eslint-disable-next-line
-  }, [token])
+  }, [])
   
   
   return (
@@ -30,14 +113,14 @@ function Mining() {
         Mining
       </NavBar>
       <div className="pt-55 px-15">
-        <div className='border-1 border-solid rounded-[10px] px-15 py-20 border-gray-100 text-14 mt-10 leading-7  text-gray-600 dark:text-white bg-white dark:bg-transparent'>
+        <div className='border-1 border-solid rounded-[10px] px-15 py-20 border-gray-200 dark:border-gray-600 text-14 mt-10 leading-7  text-gray-600 dark:text-gray-300 bg-white dark:bg-transparent'>
           Upon successfully finishing the assigned tasks, you will be rewarded with mises bonuses,
           which can later be converted into MB.
         </div>
         <div className='mt-50'>
-          <div className='border-1 border-solid rounded-[10px] overflow-hidden border-gray-200 bg-white dark:bg-transparent'>
+          <div className='border-1 border-solid rounded-[10px] overflow-hidden border-gray-200 dark:border-gray-600 bg-white dark:bg-transparent'>
             <List
-              header={<p className='py-8 dark:text-white'>Tasks</p>} style={{ '--font-size': '16px' }}>
+              header={<p className='py-8 dark:text-gray-300'>Tasks</p>} style={{ '--font-size': '16px' }}>
               <List.Item
                 extra={
                   <Button
@@ -49,7 +132,7 @@ function Mining() {
                     <span className='text-12'>GO</span>
                   </Button>
                 }>
-                <span className='block text-gray-600 dark:text-white py-10' >
+                <span className='block text-gray-600 dark:text-gray-300 py-10' >
                   Swap with Mises
                 </span>
               </List.Item>
@@ -60,8 +143,8 @@ function Mining() {
                   onClick={fetchAds}>
                   <span className='text-12'>GO</span>
                 </Button>
-              } description={`${adMiningData?.today_bonus_count || 0}/${adMiningData?.limit_per_day || 10} watched today`}>
-                <span className='mb-10 block dark:text-white text-gray-600'>
+              } description={`${adMiningData?.today_bonus_count || 0}/${adMiningData?.limit_per_day || accountData?.ad_mining.limit_per_day || 10} watched today`}>
+                <span className='mb-10 block dark:text-gray-300 text-gray-600'>
                   Watch rewarded video ads
                 </span>
               </List.Item>
@@ -69,6 +152,28 @@ function Mining() {
           </div>
         </div>
       </div>
+      <Popup
+        position='bottom'
+        showCloseButton
+        bodyClassName="rounded-t-10"
+        onMaskClick={() => {
+          setshowDialog(false)
+        }}
+        visible={showDialog}
+        onClose={() => {
+          setshowDialog(false)
+        }}>
+        <div className='py-30 px-20'>
+          <p className='text-16 leading-[24px] text-gray-500'>
+            Your request for exchange has been duly acknowledged and is anticipated to be processed within several hours. Kindly monitor your wallet for updates.
+          </p>
+          <div className='flex justify-center items-center mt-40'>
+            <Button className='w-[40%]' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+              <span className='text-white'>Connect wallet</span>
+            </Button>
+          </div>
+        </div>
+      </Popup>
     </div>
   )
 }
