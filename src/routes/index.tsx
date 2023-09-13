@@ -46,7 +46,7 @@ const Routes = () => {
       path: '/404',
       element: SuspenseWrapper(NotFund)
     },
-    { path: '/', element: <Navigate to="/mistomb" replace /> },
+    { path: '/', element: <Navigate to="/mining" replace /> },
     { path: '*', element: <Navigate to="/404" replace /> }
   ])
   return RouterList
