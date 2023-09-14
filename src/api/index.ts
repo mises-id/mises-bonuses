@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-
+import { getToken } from '@/utils'
 
 export interface accountData {
   "bonus": {
@@ -46,7 +46,10 @@ export async function signin(auth: string): Promise<{
  */
 export async function fetchBonusCount(): Promise<{"bonus": number}> {
   const { data } = await request({
-    url: '/v1/mining/bonus'
+    url: '/v1/mining/bonus',
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
+    }
   })
   return data
 }
@@ -60,6 +63,9 @@ export async function redeemBonusCount(bonus: number): Promise<boolean> {
     method: 'post',
     data: {
       bonus
+    },
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
     }
   })
   return data
@@ -77,7 +83,10 @@ export interface checkMBairdropData {
  */
 export async function checkMisesAccount(misesid: string): Promise<checkMBairdropData> {
   const { data } = await request({
-    url: `/v1/mb_airdrop/user/${misesid}`
+    url: `/v1/mb_airdrop/user/${misesid}`,
+    headers: {
+      Authorization: `Bearer ${getToken('mises-token')}`
+    }
   })
   return data
 }
@@ -91,7 +100,10 @@ export interface paramsData {
 export async function claimAirdrop(params: paramsData): Promise<void> {
   const { data } = await request({
     url: `/v1/mb_airdrop/claim`,
-    params
+    params,
+    headers: {
+      Authorization: `Bearer ${getToken('mises-token')}`
+    }
   })
   return data
 }
@@ -105,7 +117,10 @@ export async function fetchAdMiningData(): Promise<{
   "today_bonus_count": number
 }> {
   const { data } = await request({
-    url: `/v1/ad_mining/me`
+    url: `/v1/ad_mining/me`,
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
+    }
   })
   return data
 }

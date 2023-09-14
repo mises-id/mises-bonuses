@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './index.less'
 import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
@@ -23,10 +23,15 @@ function Bonuses() {
   const [formValue, setformValue] = useState<string | undefined>('')
   const [toValue, settoValue] = useState<string | undefined>('')
 
+  const accountRef = useRef<string>('')
+
+  const providerRef = useRef<any>('')
+
   // const [formBalance, setformBalance] = useState<string | undefined>('')
   const [toBalance, settoBalance] = useState<string | undefined>('')
 
   const { connector } = useWeb3React();
+
   const chainId = useChainId()
   const accounts = useAccounts()
   const isActivating = useIsActivating()
@@ -37,6 +42,7 @@ function Bonuses() {
 
   const currentAccount = useMemo(() => {
     if(accounts?.length) {
+      accountRef.current = accounts[0]
       return accounts[0]
     }
     return ''
@@ -51,27 +57,33 @@ function Bonuses() {
     // eslint-disable-next-line
   }, [])
   
-  useEffect(() => {
-    const oldConnectAddress = localStorage.getItem('ethAccount')
+  // useEffect(() => {
+  //   const oldConnectAddress = localStorage.getItem('ethAccount')
 
-    if(currentAccount && oldConnectAddress !== currentAccount && provider) {
-      setformValue('')
-      settoValue('')
-      setLoginFalse()
-      localStorage.removeItem('token')
-      signMsg().then(auth => {
-        signin(auth).then(res=> {
-          setToken('token', res.token);
-          localStorage.setItem('ethAccount', currentAccount)
-          refresh()
-          setLoginTrue()
-        }).catch(() => {
-          setLoginFalse()
-        })
-      })
-    }
-    // eslint-disable-next-line
-  }, [currentAccount, provider])
+  //   if(currentAccount && oldConnectAddress !== currentAccount && provider) {
+  //     setformValue('')
+  //     settoValue('')
+  //     setLoginFalse()
+  //     localStorage.removeItem('token')
+  //     signMsg().then(auth => {
+  //       signin(auth).then(res=> {
+  //         setToken('token', res.token);
+  //         localStorage.setItem('ethAccount', currentAccount)
+  //         refresh()
+  //         setLoginTrue()
+  //       }).catch(() => {
+  //         setLoginFalse()
+  //       })
+  //     })
+  //   }
+  //   // eslint-disable-next-line
+  // }, [currentAccount, provider])
+
+  useEffect(() => {
+    if(provider) providerRef.current = provider
+  
+  }, [provider])
+  
   
   // const ENSNames = useENSNames(provider)
   const { data: formBalance, run, refresh } = useRequest(async () => {
@@ -155,7 +167,7 @@ function Bonuses() {
   const connectWallet = async () => {
     try {
       if (!isActivating && !isActive) {
-        return await connector.activate()
+        await connector.activate()
       }
       return Promise.resolve()
     } catch (error) {
@@ -180,13 +192,20 @@ function Bonuses() {
     [connector, chainId],
   )
 
+  const sleep = (milliseconds: number) => {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  };
+
   const signMsg = async () => {
     try {
+      await sleep(1000);
       const timestamp = new Date().getTime();
-      if (accounts && accounts.length) {
-        const address = accounts[0]
+      if (accountRef.current) {
+        const address = accountRef.current
         const sigMsg = `address=${address}&nonce=${timestamp}`
-        const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
+        console.log(provider, "provider")
+        const connectProvider = provider || providerRef.current
+        const personalSignMsg = await connectProvider?.send('personal_sign', [address, sigMsg])
         if(personalSignMsg) {
           const auth = `${sigMsg}&sig=${personalSignMsg}`
           return auth
@@ -204,6 +223,7 @@ function Bonuses() {
       return Promise.reject(error)
     }
   }
+  
 
   const resetData = () => {
     setformValue('')
@@ -227,6 +247,7 @@ function Bonuses() {
       return Promise.reject(error)
     }
   }
+  console.log(currentAccount, "currentAccount=====", accounts)
 
   const checkSign = async () => {
     try {
@@ -242,6 +263,7 @@ function Bonuses() {
       }
     } catch (error) {
       setLoginFalse()
+      return Promise.reject(error)
     }
   }
 
@@ -253,15 +275,7 @@ function Bonuses() {
       await swap()
     } catch (error: any) {
       setFalse()
-
-      if(error && error.code) {
-        if(error.code === ErrorCode.pleaseWait || error.name === "AxiosError") {
-          Toast.show(error.message)
-          return
-        }
-      }
-      console.log(error)
-      
+      Toast.show(error.message)
     }
   }
 
@@ -356,7 +370,7 @@ function Bonuses() {
             <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40" height="40"><path d="M640 224c19.2 0 38.4 9.6 51.2 25.6l118.4 156.8c19.2 25.6 16 57.6-3.2 80l-246.4 275.2c-22.4 25.6-64 28.8-89.6 6.4-3.2 0-3.2-3.2-3.2-3.2l-249.6-275.2c-19.2-22.4-22.4-57.6-3.2-83.2l118.4-156.8c12.8-16 32-25.6 51.2-25.6h256z m0 64h-256l-118.4 156.8 246.4 275.2 246.4-275.2L640 288z m-32 96c19.2 0 32 12.8 32 32s-12.8 32-32 32h-192c-19.2 0-32-12.8-32-32s12.8-32 32-32h192z" fill="#5D61FF" data-spm-anchor-id="a313x.search_index.0.i0.72cd3a81Rm0qVB"></path></svg>
           </div>
           <p className='flex-auto text-[16px] font-200 text-gray-500 leading-7'>
-            The existing exchange rate between bonus and MB stands at 1 : {accountData?.bonus.bonus_to_mb_rate}. The minimum exchange limit is {accountData?.bonus?.min_redeem_bonus_amount }.
+            The existing exchange rate between bonus and MB stands at 1 : {accountData?.bonus.bonus_to_mb_rate}. Exchanges cannot be less than {accountData?.bonus?.min_redeem_bonus_amount }.
           </p>
         </div>
       </div>

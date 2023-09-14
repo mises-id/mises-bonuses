@@ -1,6 +1,6 @@
 import { fetchAdMiningData, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
-import { getToken, removeToken, setToken } from '@/utils';
+import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useRequest } from 'ahooks';
 import { NavBar, List, Button, Popup } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -19,16 +19,16 @@ function Mining() {
   // const isActive = useIsActive()
 
   const provider = useProvider()
-  const [login, {setTrue: setLoginTrue, setFalse: setLoginFalse}] = useBoolean(false)
+  const [login, { setTrue: setLoginTrue, setFalse: setLoginFalse }] = useBoolean(false)
   console.log(login)
   const currentAccount = useMemo(() => {
-    if(accounts?.length) {
+    if (accounts?.length) {
       return accounts[0]
     }
     return ''
   }, [accounts])
 
-  
+
   const signMsg = async () => {
     try {
       const timestamp = new Date().getTime();
@@ -36,7 +36,7 @@ function Mining() {
         const address = accounts[0]
         const sigMsg = `address=${address}&nonce=${timestamp}`
         const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
-        if(personalSignMsg) {
+        if (personalSignMsg) {
           const auth = `${sigMsg}&sig=${personalSignMsg}`
           return auth
         }
@@ -56,13 +56,13 @@ function Mining() {
 
   const loginMises = () => {
     const oldConnectAddress = localStorage.getItem('ethAccount')
-    if(currentAccount && oldConnectAddress !== currentAccount && provider) {
+    const token = getToken()
+    if ((oldConnectAddress !== currentAccount || !token) && provider) {
       setLoginFalse()
-      localStorage.removeItem('token')
       removeToken('token')
       signMsg().then(auth => {
-        signin(auth).then(res=> {
-          setToken('mises-token', res.token)
+        signin(auth).then(res => {
+          setToken('token', res.token)
           localStorage.setItem('ethAccount', currentAccount)
           refresh()
           setLoginTrue()
@@ -95,26 +95,41 @@ function Mining() {
 
   const { accountData } = usePageValue()
 
-  const { data: adMiningData, run, refresh } = useRequest(fetchAdMiningData, {
+  const { data: adMiningData, run, refresh, error } = useRequest(fetchAdMiningData, {
     retryCount: 3,
     manual: true,
   })
 
   useEffect(() => {
     const token = getToken()
-    if(token) {
+    if (token) {
       run()
+      setLoginTrue()
     }
     // eslint-disable-next-line
   }, [])
-  
-  
+
+  useEffect(() => {
+    const errorResponse = (error as any)?.response
+    if (error && errorResponse && errorResponse.status === 403 && errorResponse.data.code === 403002) {
+      localStorage.removeItem('token');
+      setLoginFalse()
+    }
+    // eslint-disable-next-line
+  }, [error])
+
+
   return (
     <div>
       <NavBar className={`fixed left-0 right-0 top-0 z-10`} backArrow={false}>
         Mining
       </NavBar>
       <div className="pt-55 px-15">
+        {currentAccount && <div className='flex justify-end'>
+          <div className='rounded-2xl p-10 bg-white dark:bg-[#EEEFFF]'>
+            {shortenAddress(currentAccount)}
+          </div>
+        </div>}
         <div className='border-1 border-solid rounded-[10px] px-15 py-20 border-gray-200 dark:border-gray-600 text-14 mt-10 leading-7  text-gray-600 dark:text-gray-300 bg-white dark:bg-transparent'>
           Upon successfully finishing the assigned tasks, you will be rewarded with mises bonuses,
           which can later be converted into MB.

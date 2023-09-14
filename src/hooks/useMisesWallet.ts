@@ -54,7 +54,7 @@ export function useMisesWallet() {
         setisActivating(false)
         checkConnect(provider)
         window.addEventListener("mises_keystorechange", async () => {
-          activate()
+          activate(provider)
         })
       }
     })
