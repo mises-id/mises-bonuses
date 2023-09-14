@@ -4,7 +4,7 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance } from '@/utils'
+import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance, getToken } from '@/utils'
 import { useMisesWallet } from '@/hooks/useMisesWallet'
 import { getAmount } from '@/hooks/useInitialBankBalance'
 import { useBoolean, useRequest } from 'ahooks'
@@ -274,11 +274,10 @@ function MISToMB() {
   }
 
   const Extra = () => {
-    if(checkAccountData?.current_airdrop_limit) {
-      const limit = formatAmount(`${checkAccountData?.current_airdrop_limit || 0}`, 6)
-      return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
-    }
-    return null;
+    const token = getToken()
+    if(!token) { return null }
+    const limit = formatAmount(`${checkAccountData?.current_airdrop_limit || 0}`, 6)
+    return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
   }
 
   const setMisMax = () => {
