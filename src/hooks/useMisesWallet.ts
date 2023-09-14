@@ -1,5 +1,5 @@
 import { checkMisesAccount, signin } from "@/api";
-import { Uint8ArrayToHexString, misesBurnAddress } from "@/utils";
+import { Uint8ArrayToHexString, misesBurnAddress, setToken } from "@/utils";
 import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
@@ -84,9 +84,7 @@ export function useMisesWallet() {
         } = await provider.misesAccount()
         setaccount(result.address)
         signin(result.auth).then(res=> {
-          localStorage.setItem('token', res.token)
-          // localStorage.setItem('ethAccount', currentAccount)
-          // refresh()
+          setToken('mises-token', res.token)
         })
 
         localStorage.setItem('misesAccount', result.address)

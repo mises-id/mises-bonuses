@@ -4,7 +4,7 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken } from '@/utils'
+import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken, setToken } from '@/utils'
 import { fetchBonusCount, redeemBonusCount, signin } from '@/api'
 import { useBoolean, useRequest } from 'ahooks'
 import { usePageValue } from '@/components/pageProvider'
@@ -61,7 +61,7 @@ function Bonuses() {
       localStorage.removeItem('token')
       signMsg().then(auth => {
         signin(auth).then(res=> {
-          localStorage.setItem('token', res.token)
+          setToken('token', res.token);
           localStorage.setItem('ethAccount', currentAccount)
           refresh()
           setLoginTrue()
@@ -235,7 +235,7 @@ function Bonuses() {
       if(!token || currentAccount !== oldConnectAddress) {
         const auth = await signMsg()
         const res = await signin(auth)
-        localStorage.setItem('token', res.token)
+        setToken('token', res.token);
         localStorage.setItem('ethAccount', currentAccount)
         refresh()
         setLoginTrue()

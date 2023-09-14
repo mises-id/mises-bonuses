@@ -1,6 +1,6 @@
 import { fetchAdMiningData, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
-import { getToken } from '@/utils';
+import { getToken, removeToken, setToken } from '@/utils';
 import { useBoolean, useRequest } from 'ahooks';
 import { NavBar, List, Button, Popup } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -59,9 +59,10 @@ function Mining() {
     if(currentAccount && oldConnectAddress !== currentAccount && provider) {
       setLoginFalse()
       localStorage.removeItem('token')
+      removeToken('token')
       signMsg().then(auth => {
         signin(auth).then(res=> {
-          localStorage.setItem('token', res.token)
+          setToken('mises-token', res.token)
           localStorage.setItem('ethAccount', currentAccount)
           refresh()
           setLoginTrue()

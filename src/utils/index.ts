@@ -122,9 +122,17 @@ export const getErc20Balance = async (address: string) => {
     }
   }
 }
+type tokenName = 'token' | 'mises-token'
+export function getToken(tokenName: tokenName = "token") {
+  return localStorage.getItem(tokenName)
+}
 
-export function getToken() {
-  return localStorage.getItem('token')
+export function setToken(tokenName: tokenName="token", tokenValue: string) {
+  return localStorage.setItem(tokenName, tokenValue)
+}
+
+export function removeToken(tokenName: tokenName="token") {
+  return localStorage.removeItem(tokenName)
 }
 
 export const TRUNCATED_ADDRESS_START_CHARS = 5;

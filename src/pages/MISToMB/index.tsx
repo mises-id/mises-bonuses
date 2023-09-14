@@ -4,7 +4,7 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance } from '@/utils'
+import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance, removeToken } from '@/utils'
 import { useMisesWallet } from '@/hooks/useMisesWallet'
 import { getAmount } from '@/hooks/useInitialBankBalance'
 import { useBoolean, useRequest } from 'ahooks'
@@ -17,6 +17,7 @@ const { useChainId, useAccounts, useIsActivating, useIsActive } = hooks
 
 function MISToMB() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
+  const [showSubmitDialog, setshowSubmitDialog] = useState(false)
 
   const [loading, {setTrue, setFalse}] = useBoolean(false)
 
@@ -35,7 +36,7 @@ function MISToMB() {
   const isActivating = useIsActivating()
 
   const isActive = useIsActive()
-  
+
   const { accountData } = usePageValue()
 
   // const provider = useProvider()
@@ -88,7 +89,7 @@ function MISToMB() {
         await claimAirdrop({receive_address: accounts[0]})
       } catch (error: any) {
         if(error.response && error.response.status === 403 && error.response.data.code === 403002) {
-          localStorage.removeItem('token');
+          removeToken('mises-token')
           misesProviderActivate()
         }
         return Promise.reject(error)
@@ -226,21 +227,11 @@ function MISToMB() {
       // connect eth wallet
       if(stepStatus === 2) {
         await connectWallet();
-        await checkChainId();
         return;
       }
 
       // redeem token
-      setTrue();
-      if(stepStatus === 3) {
-        await checkUserAddress()
-        await setClaimReceiveAddress()
-        if(formValue) {
-          const aaa = await sendMisTx(formValue)
-          console.log(aaa)
-        }
-        resetData()
-      }
+      setshowSubmitDialog(true)
       
     } catch (error: any) {
       setFalse()
@@ -258,9 +249,29 @@ function MISToMB() {
     })
   }, [])
 
-  const addMB = () => {
+  const addMB = async () => {
+    await checkChainId();
     connector.watchAsset?.(MBCoinInfo)
     setshowConfirmDialog(false)
+  }
+
+
+  const redeemSubmit = async () => {
+    try {
+      setTrue();
+      if(stepStatus === 3) {
+        await checkUserAddress()
+        await setClaimReceiveAddress()
+        if(formValue) {
+          const aaa = await sendMisTx(formValue)
+          console.log(aaa)
+        }
+        resetData()
+      }
+    } catch (error) {
+      setFalse();
+      setshowSubmitDialog(false)
+    }
   }
 
 
@@ -347,7 +358,7 @@ function MISToMB() {
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
         <p className='text-[16px] font-200 text-gray-500 leading-6 p-10'>
-        On September 7, 2023, a snapshot of the Mis chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. The exchange rate from Mis to MB is set at a 1:1 ratio. Minimum exchange {accountData?.mb_airdrop?.min_redeem_mis_amount} MIS
+        On September 7, 2023, a snapshot of the Mis chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. After deducting Mis worth the same value as gas consumption, Mis and MB are exchanged at a ratio of 1:1.It is important to note that the opportunity to redeem is available only once. We kindly request that you ensure all the Mis you wish to redeem are present in your account prior to proceeding. Exchanges cannot be less than {accountData?.mb_airdrop?.min_redeem_mis_amount} MIS.
         </p>
       </div>
       <Popup
@@ -368,6 +379,29 @@ function MISToMB() {
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[40%]' onClick={addMB} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
               <span className='text-white'>Add $MB</span>
+            </Button>
+          </div>
+        </div>
+      </Popup>
+
+      <Popup
+        position='bottom'
+        showCloseButton
+        bodyClassName="rounded-t-10"
+        onMaskClick={() => {
+          setshowSubmitDialog(false)
+        }}
+        visible={showSubmitDialog}
+        onClose={() => {
+          setshowSubmitDialog(false)
+        }}>
+        <div className='py-30 px-20'>
+          <p className='text-16 leading-[24px] text-gray-500'>
+            Please ensure all Mis for redemption are in your account, as you only have one chance to redeem.
+          </p>
+          <div className='flex justify-center items-center mt-40'>
+            <Button className='w-[40%]' onClick={redeemSubmit} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+              <span className='text-white'>Comfirm</span>
             </Button>
           </div>
         </div>
