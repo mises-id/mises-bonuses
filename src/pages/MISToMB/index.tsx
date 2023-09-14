@@ -35,6 +35,8 @@ function MISToMB() {
   const isActivating = useIsActivating()
 
   const isActive = useIsActive()
+  
+  const { accountData } = usePageValue()
 
   // const provider = useProvider()
   // const ENSNames = useENSNames(provider)
@@ -78,7 +80,7 @@ function MISToMB() {
       }
     }
     // eslint-disable-next-line
-  }, [balance])
+  }, [balance, checkAccountData?.current_airdrop_limit, accountData?.mb_airdrop?.min_redeem_mis_amount])
   
   const setClaimReceiveAddress = async () => {
     if(misesAccount && accounts?.length && misesAccountData?.pubkey) {
@@ -261,7 +263,6 @@ function MISToMB() {
     setshowConfirmDialog(false)
   }
 
-  const { accountData } = usePageValue()
 
   const replaceValue = (val: string, decimals: number = 18) => {
     const valueRegex = new RegExp( `^\\d*[.]?\\d{0,${decimals}}`,'g')
