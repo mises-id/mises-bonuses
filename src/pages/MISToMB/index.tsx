@@ -262,6 +262,7 @@ function MISToMB() {
       if(stepStatus === 3) {
         await checkUserAddress()
         await setClaimReceiveAddress()
+        setshowSubmitDialog(false)
         if(formValue) {
           const aaa = await sendMisTx(formValue)
           console.log(aaa)
