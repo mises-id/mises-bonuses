@@ -4,7 +4,7 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance, getToken } from '@/utils'
+import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance } from '@/utils'
 import { useMisesWallet } from '@/hooks/useMisesWallet'
 import { getAmount } from '@/hooks/useInitialBankBalance'
 import { useBoolean, useRequest } from 'ahooks'
@@ -57,6 +57,28 @@ function MISToMB() {
    return formatAmount(getAmount(misBalance!, "umis"), 6)
    // eslint-disable-next-line
   }, [misBalance])
+
+  useEffect(() => {
+    if(Number(balance) > 0) {
+      // min exchange
+      if(accountData?.mb_airdrop?.min_redeem_mis_amount && balance) {
+        const compared = BigNumber(balance).comparedTo(accountData?.mb_airdrop?.min_redeem_mis_amount)
+        if(compared === -1) {
+          return
+        }
+      }
+      console.log(checkAccountData?.current_airdrop_limit)
+      if(checkAccountData?.current_airdrop_limit === 0) {
+        seterrorTxt('No redemption limit left')
+      }
+      if(checkAccountData?.current_airdrop_limit) {
+        const limit = formatAmount(`${checkAccountData.current_airdrop_limit}`, 6)
+        const value = BigNumber.min(limit, balance).toString()
+        formValueChange(value)
+      }
+    }
+    // eslint-disable-next-line
+  }, [balance])
   
   const setClaimReceiveAddress = async () => {
     if(misesAccount && accounts?.length && misesAccountData?.pubkey) {
@@ -254,8 +276,7 @@ function MISToMB() {
     }
 
     if(accountData?.mb_airdrop?.min_redeem_mis_amount && value) {
-      const limit = formatAmount(`${accountData?.mb_airdrop?.min_redeem_mis_amount}`, 6)
-      const compared = BigNumber(value).comparedTo(limit)
+      const compared = BigNumber(value).comparedTo(accountData?.mb_airdrop?.min_redeem_mis_amount)
       if(compared === -1) {
         seterrorTxt(`Minimum redeem ${accountData?.mb_airdrop?.min_redeem_mis_amount} MIS`)
         return
@@ -274,18 +295,12 @@ function MISToMB() {
   }
 
   const Extra = () => {
-    const token = getToken()
-    if(!token) { return null }
+    // const token = getToken()
+    if(!misesAccount) { return null }
     const limit = formatAmount(`${checkAccountData?.current_airdrop_limit || 0}`, 6)
     return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
   }
 
-  const setMisMax = () => {
-    if(checkAccountData?.current_airdrop_limit) {
-      const value = BigNumber.min(balance, checkAccountData?.current_airdrop_limit)
-      formValueChange(value.toString())
-    }
-  }
   return (
     <div>
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
@@ -297,10 +312,10 @@ function MISToMB() {
           coinInfo={MisInfo}
           value={formValue}
           onChange={formValueChange}
-          showMax={true}
+          showMax={false}
+          readOnly
           balance={balance}
           extra={<Extra />}
-          setMisMax={setMisMax}
           account={misesAccount}
         />
         <div className='h-35 w-35 rounded-[12px] mx-auto my-[-18px] border-4 border-solid relative z-10 border-[#fff] dark:border-[#0d111c] dark:bg-[#293249] bg-[#e8ecfb] flex items-center justify-center'>
@@ -328,7 +343,7 @@ function MISToMB() {
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
         <p className='text-[16px] font-200 text-gray-500 leading-6 p-10'>
-        On September 7, 2023, a snapshot of the Mis chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. The exchange rate from Mis to MB is set at a 1:1 ratio.
+        On September 7, 2023, a snapshot of the Mis chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. The exchange rate from Mis to MB is set at a 1:1 ratio. Minimum exchange {accountData?.mb_airdrop?.min_redeem_mis_amount} MIS
         </p>
       </div>
       <Popup
