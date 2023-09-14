@@ -195,6 +195,14 @@
   width: 40%;
 }
 
+.w-\[100px\] {
+  width: 100px;
+}
+
+.w-\[150px\] {
+  width: 150px;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -385,20 +393,16 @@
   font-weight: 700;
 }
 
+.leading-7 {
+  line-height: 1.75rem;
+}
+
 .leading-\[24px\] {
   line-height: 24px;
 }
 
 .leading-6 {
   line-height: 1.5rem;
-}
-
-.leading-7 {
-  line-height: 1.75rem;
-}
-
-.leading-8 {
-  line-height: 2rem;
 }
 
 .text-gray-500 {

@@ -97,7 +97,10 @@ function MISToMB() {
   useEffect(() => {
     if(accounts && accounts.length) {
       getErc20Balance(accounts[0]).then(res => {
-        settoBalance(Number(res?.formatted).toFixed(6) || '')
+        if(res?.formatted) {
+          const balance = BigNumber(res?.formatted).decimalPlaces(6, BigNumber.ROUND_DOWN).toString()
+          settoBalance(balance)
+        }
       })
       setClaimReceiveAddress()
     }

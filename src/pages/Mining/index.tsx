@@ -169,7 +169,7 @@ function Mining() {
             Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.
           </p>
           <div className='flex justify-center items-center mt-40'>
-            <Button className='w-[40%]' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+            <Button className='w-[150px]' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
               <span className='text-white'>Connect wallet</span>
             </Button>
           </div>

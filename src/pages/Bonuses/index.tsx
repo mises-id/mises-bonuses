@@ -76,11 +76,10 @@ function Bonuses() {
   // const ENSNames = useENSNames(provider)
   const { data: formBalance, run, refresh } = useRequest(async () => {
     const token = getToken()
-    console.log(token)
     if(!token) return '';
     try {
       const data = await fetchBonusCount();
-      return `${data.bonus > 0 ? Number(data.bonus).toFixed(2) : 0}`
+      return `${data.bonus}`
     } catch (error: any) {
       if(error.response && error.response.status === 403 && error.response.data.code === 403002) {
         localStorage.removeItem('token');
@@ -97,7 +96,10 @@ function Bonuses() {
   const fetchMBBalance = () => {
     console.log("fetchMBBalance")
     getErc20Balance(currentAccount).then(res => {
-      settoBalance(Number(res?.formatted).toFixed(6) || '')
+      if(res?.formatted) {
+        const balance = BigNumber(res?.formatted).decimalPlaces(6, BigNumber.ROUND_DOWN).toString()
+        settoBalance(balance)
+      }
     })
   }
 
@@ -319,6 +321,7 @@ function Bonuses() {
         <TokenInput
           coinInfo={BonusesInfo}
           value={formValue}
+          toFixed={2}
           onChange={formValueChange}
           showMax
           symbol=" "
