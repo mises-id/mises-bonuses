@@ -88,6 +88,7 @@ export async function checkMisesAccount(misesid: string): Promise<checkMBairdrop
       Authorization: `Bearer ${getToken('mises-token')}`
     }
   })
+  // data.current_airdrop_limit = data.total_airdrop_limit
   return data
 }
 

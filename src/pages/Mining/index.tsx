@@ -155,7 +155,7 @@ function Mining() {
                     color='primary'
                     size='small'
                     onClick={() => {
-                      window.open('https://swap.mises.site', 'target=_blank');
+                      window.open('https://swap.test.mises.site', 'target=_blank');
                     }}>
                     <span className='text-12'>GO</span>
                   </Button>

@@ -61,7 +61,7 @@ function MISToMB() {
    // eslint-disable-next-line
   }, [misBalance])
 
-  useEffect(() => {
+  const initFormData = () => {
     formValueChange('');
 
     if(Number(balance) > 0) {
@@ -87,6 +87,9 @@ function MISToMB() {
         }
       }
     }
+  }
+  useEffect(() => {
+    initFormData()
     // eslint-disable-next-line
   }, [balance, checkAccountData?.current_airdrop_limit, accountData?.mb_airdrop?.min_redeem_mis_amount])
   
@@ -117,7 +120,7 @@ function MISToMB() {
           settoBalance(balance)
         }
       })
-      setClaimReceiveAddress()
+      // setClaimReceiveAddress()
     }
     // eslint-disable-next-line
   }, [accounts])
@@ -220,13 +223,14 @@ function MISToMB() {
     })
   }
 
-  const resetData = () => {
+  const resetData = async () => {
     setformValue('')
     settoValue('')
     setshowConfirmDialog(true)
     setFalse()
-    refreshMis()
-    refreshLimit()
+    await refreshMis()
+    await refreshLimit()
+    initFormData()
   }
 
   const buttonClick = async () => {
@@ -373,7 +377,7 @@ function MISToMB() {
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
         <p className='text-[16px] font-200 text-gray-500 leading-6 p-10'>
-        On September 7, 2023, a snapshot of the Mis chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. After deducting Mis worth the same value as gas consumption, Mis and MB are exchanged at a ratio of 1:1.It is important to note that the opportunity to redeem is available only once. We kindly request that you ensure all the Mis you wish to redeem are present in your account prior to proceeding. Exchanges cannot be less than <span className='font-bold'>{accountData?.mb_airdrop?.min_redeem_mis_amount}</span> MIS.
+        On September 7, 2023, a snapshot of the MIS chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. After deducting MIS worth the same value as gas consumption, MIS and MB are exchanged at a ratio of 1:1.It is important to note that the opportunity to redeem is available only once. We kindly request that you ensure all the MIS you wish to redeem are present in your account prior to proceeding. Exchanges cannot be less than <span className='font-bold'>{accountData?.mb_airdrop?.min_redeem_mis_amount}</span> MIS.
         </p>
       </div>
       <Popup
@@ -412,7 +416,7 @@ function MISToMB() {
         }}>
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-            Please ensure all Mis for redemption are in your account, as you only have one chance to redeem.
+            Please ensure all MIS for redemption are in your account, as you only have one chance to redeem.
           </p>
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[40%]' onClick={redeemSubmit} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
