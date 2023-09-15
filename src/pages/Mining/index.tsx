@@ -20,6 +20,7 @@ function Mining() {
 
   const provider = useProvider()
   const [login, { setTrue: setLoginTrue, setFalse: setLoginFalse }] = useBoolean(false)
+  const [adsLoading, { setTrue: setAdsLoadingTrue, setFalse: setAdsLoadingFalse }] = useBoolean(false)
   console.log(login)
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
@@ -84,13 +85,21 @@ function Mining() {
     loginMises()
   }
 
+  const adsCallback = () => {
+    setTimeout(() => {
+      setAdsLoadingFalse()
+    }, 1000);
+  }
+
   const fetchAds = () => {
     const token = getToken()
     if (!token) {
       setshowDialog(true)
       return
     }
-    (window.misesEthereum as any).showAds?.()
+    window.misesEthereum?.showAds?.()
+    setAdsLoadingTrue()
+    adsCallback()
   }
 
   const { accountData } = usePageValue()
@@ -168,6 +177,7 @@ function Mining() {
                 <Button
                   color='primary'
                   size='small'
+                  loading={adsLoading}
                   onClick={fetchAds}>
                   <span className='text-12'>GO</span>
                 </Button>

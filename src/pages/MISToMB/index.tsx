@@ -377,7 +377,9 @@ function MISToMB() {
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
         <p className='text-[16px] font-200 text-gray-500 leading-6 p-10'>
-        On September 7, 2023, a snapshot of the MIS chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. After deducting MIS worth the same value as gas consumption, MIS and MB are exchanged at a ratio of 1:1.It is important to note that the opportunity to redeem is available only once. We kindly request that you ensure all the MIS you wish to redeem are present in your account prior to proceeding. Exchanges cannot be less than <span className='font-bold'>{accountData?.mb_airdrop?.min_redeem_mis_amount}</span> MIS.
+        The maximum redeemable quantity is based on the snapshot on Sept 7th. 
+        Please note that only one redemption is allowed, so make sure to redeem all at once. 
+        The minimum redemption quantity is <span className='font-bold'>{accountData?.mb_airdrop?.min_redeem_mis_amount}</span> MIS.
         </p>
       </div>
       <Popup

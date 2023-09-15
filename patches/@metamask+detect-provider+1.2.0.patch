@@ -139,10 +139,13 @@ index a5262e4..fb49cd7 100644
 +!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).detectEthereumProvider=e()}}((function(){return function({mustBeMetaMask:e=!1,silent:t=!1,timeout:o=3e3}={}){!function(){if("boolean"!=typeof e)throw new Error("@metamask/detect-provider: Expected option 'mustBeMetaMask' to be a boolean.");if("boolean"!=typeof t)throw new Error("@metamask/detect-provider: Expected option 'silent' to be a boolean.");if("number"!=typeof o)throw new Error("@metamask/detect-provider: Expected option 'timeout' to be a number.")}();let n=!1;return new Promise(i=>{function r(){if(n)return;n=!0,window.removeEventListener("ethereum#initialized",r);const{misesEthereum:o}=window;if(!o||e&&!o.isMetaMask){const n=e&&o?"Non-MetaMask window.misesEthereum detected.":"Unable to detect window.misesEthereum.";!t&&console.error("@metamask/detect-provider:",n),i(null)}else i(o)}window.misesEthereum?r():(window.addEventListener("ethereum#initialized",r,{once:!0}),setTimeout(()=>{r()},o))})}}));
 \ No newline at end of file
 diff --git a/node_modules/@metamask/detect-provider/dist/index.d.ts b/node_modules/@metamask/detect-provider/dist/index.d.ts
-index 59d15f3..71af6d2 100644
+index 59d15f3..f45b265 100644
 --- a/node_modules/@metamask/detect-provider/dist/index.d.ts
 +++ b/node_modules/@metamask/detect-provider/dist/index.d.ts
-@@ -3,7 +3,7 @@ interface EthereumProvider {
+@@ -1,9 +1,10 @@
+ interface EthereumProvider {
+     isMetaMask?: boolean;
++    showAds: () => void;
  }
  declare global {
      interface Window {
