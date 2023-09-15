@@ -78,8 +78,13 @@ function MISToMB() {
       }
       if(checkAccountData?.current_airdrop_limit) {
         const limit = formatAmount(`${checkAccountData.current_airdrop_limit}`, 6)
-        const value = BigNumber.min(limit, balance).toString()
-        formValueChange(value)
+        const value = BigNumber.min(limit, balance)
+        const compared = BigNumber(balance).comparedTo(checkAccountData.current_airdrop_limit)
+        if(compared === -1) {
+          formValueChange(value.minus(0.003).toString())
+        }else {
+          formValueChange(value.toString())
+        }
       }
     }
     // eslint-disable-next-line
@@ -338,7 +343,7 @@ function MISToMB() {
           value={formValue}
           onChange={formValueChange}
           showMax={false}
-          // readOnly
+          readOnly
           balance={balance}
           extra={<Extra />}
           account={misesAccount}

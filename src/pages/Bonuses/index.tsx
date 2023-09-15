@@ -57,27 +57,27 @@ function Bonuses() {
     // eslint-disable-next-line
   }, [])
   
-  // useEffect(() => {
-  //   const oldConnectAddress = localStorage.getItem('ethAccount')
+  useEffect(() => {
+    const oldConnectAddress = localStorage.getItem('ethAccount')
 
-  //   if(currentAccount && oldConnectAddress !== currentAccount && provider) {
-  //     setformValue('')
-  //     settoValue('')
-  //     setLoginFalse()
-  //     localStorage.removeItem('token')
-  //     signMsg().then(auth => {
-  //       signin(auth).then(res=> {
-  //         setToken('token', res.token);
-  //         localStorage.setItem('ethAccount', currentAccount)
-  //         refresh()
-  //         setLoginTrue()
-  //       }).catch(() => {
-  //         setLoginFalse()
-  //       })
-  //     })
-  //   }
-  //   // eslint-disable-next-line
-  // }, [currentAccount, provider])
+    if(currentAccount && oldConnectAddress !== currentAccount && provider) {
+      setformValue('')
+      settoValue('')
+      setLoginFalse()
+      localStorage.removeItem('token')
+      signMsg().then(auth => {
+        signin(auth).then(res=> {
+          setToken('token', res.token);
+          localStorage.setItem('ethAccount', currentAccount)
+          refresh()
+          setLoginTrue()
+        }).catch(() => {
+          setLoginFalse()
+        })
+      })
+    }
+    // eslint-disable-next-line
+  }, [currentAccount, provider])
 
   useEffect(() => {
     if(provider) providerRef.current = provider

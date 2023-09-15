@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { hooks } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
 
-const { useAccounts, useProvider } = hooks
+const { useAccounts, useProvider, useIsActive } = hooks
 
 function Mining() {
   const [showDialog, setshowDialog] = useState(false)
@@ -16,7 +16,7 @@ function Mining() {
   // const isActivating = useIsActivating()
   const { connector } = useWeb3React();
 
-  // const isActive = useIsActive()
+  const isActive = useIsActive()
 
   const provider = useProvider()
   const [login, { setTrue: setLoginTrue, setFalse: setLoginFalse }] = useBoolean(false)
@@ -118,6 +118,17 @@ function Mining() {
     // eslint-disable-next-line
   }, [error])
 
+  const buttonText = useMemo(() => {
+    if(!isActive || !accounts) {
+      return 'Connect wallet'
+    }
+    const token = getToken();
+    if(accounts && !token) {
+      return 'Sign Message'
+    }
+    //
+  }, [accounts, isActive])
+
 
   return (
     <div>
@@ -186,7 +197,7 @@ function Mining() {
           </p>
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[150px]' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-              <span className='text-white'>Connect wallet</span>
+              <span className='text-white'>{buttonText}</span>
             </Button>
           </div>
         </div>

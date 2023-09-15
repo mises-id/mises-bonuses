@@ -83,9 +83,9 @@ export function useMisesWallet() {
           auth: string
         } = await provider.misesAccount()
         setaccount(result.address)
-        signin(result.auth).then(res=> {
-          setToken('mises-token', res.token)
-        })
+        
+        const tokenRes = await signin(result.auth)
+        setToken('mises-token', tokenRes.token)
 
         localStorage.setItem('misesAccount', result.address)
         const params = new URLSearchParams(`?${result.auth}`)
