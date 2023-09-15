@@ -92,7 +92,8 @@ export async function checkMisesAccount(misesid: string): Promise<checkMBairdrop
 }
 
 export interface paramsData {
-  receive_address: string
+  receive_address: string,
+  tx_hash?: string,
 }
 /**
  * claim $MB

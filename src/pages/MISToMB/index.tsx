@@ -85,10 +85,10 @@ function MISToMB() {
     // eslint-disable-next-line
   }, [balance, checkAccountData?.current_airdrop_limit, accountData?.mb_airdrop?.min_redeem_mis_amount])
   
-  const setClaimReceiveAddress = async () => {
+  const setClaimReceiveAddress = async (tx_hash?: string) => {
     if(misesAccount && accounts?.length && misesAccountData?.pubkey) {
       try {
-        await claimAirdrop({receive_address: accounts[0]})
+        await claimAirdrop({receive_address: accounts[0], tx_hash: tx_hash})
       } catch (error: any) {
         if(error.response && error.response.status === 403 && error.response.data.code === 403002) {
           removeToken('mises-token')
@@ -263,17 +263,19 @@ function MISToMB() {
       setTrue();
       if(stepStatus === 3) {
         await checkUserAddress()
-        await setClaimReceiveAddress()
         setshowSubmitDialog(false)
         if(formValue) {
           const aaa = await sendMisTx(formValue)
-          console.log(aaa)
+          await setClaimReceiveAddress(aaa.transactionHash)
         }
         resetData()
       }
-    } catch (error) {
+    } catch (error: any) {
       setFalse();
       setshowSubmitDialog(false)
+      if(error.message) {
+        Toast.show(error.message)
+      }
     }
   }
 
@@ -331,7 +333,7 @@ function MISToMB() {
           value={formValue}
           onChange={formValueChange}
           showMax={false}
-          readOnly
+          // readOnly
           balance={balance}
           extra={<Extra />}
           account={misesAccount}
