@@ -338,7 +338,7 @@ function MISToMB() {
           value={formValue}
           onChange={formValueChange}
           showMax={false}
-          // readOnly
+          readOnly
           balance={balance}
           extra={<Extra />}
           account={misesAccount}
