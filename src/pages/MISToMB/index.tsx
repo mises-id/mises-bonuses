@@ -85,7 +85,7 @@ function MISToMB() {
     // eslint-disable-next-line
   }, [balance, checkAccountData?.current_airdrop_limit, accountData?.mb_airdrop?.min_redeem_mis_amount])
   
-  const setClaimReceiveAddress = async (tx_hash?: string) => {
+  const claimReceiveAddress = async (tx_hash?: string) => {
     if(misesAccount && accounts?.length && misesAccountData?.pubkey) {
       try {
         await claimAirdrop({receive_address: accounts[0], tx_hash: tx_hash})
@@ -98,6 +98,11 @@ function MISToMB() {
       }
     }
   }
+
+  const { run: setClaimReceiveAddress } = useRequest(claimReceiveAddress, {
+    manual: true,
+    retryCount: 3
+  })
 
   useEffect(() => {
     if(accounts && accounts.length) {
@@ -264,9 +269,9 @@ function MISToMB() {
       if(stepStatus === 3) {
         await checkUserAddress()
         setshowSubmitDialog(false)
-        if(formValue) {
-          const aaa = await sendMisTx(formValue)
-          await setClaimReceiveAddress(aaa.transactionHash)
+        if(formValue && accounts) {
+          const txData = await sendMisTx(formValue, accounts[0])
+          await setClaimReceiveAddress(txData.transactionHash)
         }
         resetData()
       }
@@ -333,7 +338,7 @@ function MISToMB() {
           value={formValue}
           onChange={formValueChange}
           showMax={false}
-          readOnly
+          // readOnly
           balance={balance}
           extra={<Extra />}
           account={misesAccount}

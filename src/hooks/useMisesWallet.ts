@@ -112,7 +112,8 @@ export function useMisesWallet() {
   const lcd = useLCDClient()
   
   const sendMisTx = async (
-    value: string
+    value: string,
+    memo: string
   ) => {
     if (!account) {
       return Promise.reject({
@@ -142,7 +143,7 @@ export function useMisesWallet() {
         accountInfo.getAccountNumber(),
         accountInfo.getSequenceNumber(),
         new AuthInfo([], fee),
-        new TxBody(signTx, '')
+        new TxBody(signTx, memo)
       )
       await misesProvider.enable(chainId);
 
