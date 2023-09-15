@@ -36,7 +36,8 @@
     "build:test": "REACT_APP_NODE_ENV=test craco build",
     "test": "craco test",
     "eject": "craco eject",
-    "css": "npx tailwindcss -i ./src/styles/tailwindcss.css -o ./src/styles/global.css --watch"
+    "css": "npx tailwindcss -i ./src/styles/tailwindcss.css -o ./src/styles/global.css --watch",
+    "postinstall": "patch-package"
   },
   "eslintConfig": {
     "extends": [
@@ -62,6 +63,7 @@
     "craco-less": "2.1.0-alpha.0",
     "less": "^4.1.3",
     "less-loader": "^11.0.0",
-    "node-polyfill-webpack-plugin": "^2.0.1"
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "patch-package": "^8.0.0"
   }
 }

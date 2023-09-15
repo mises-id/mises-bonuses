@@ -90,7 +90,7 @@ function Mining() {
       setshowDialog(true)
       return
     }
-    (window.ethereum as any).showAds?.()
+    (window.misesEthereum as any).showAds?.()
   }
 
   const { accountData } = usePageValue()
