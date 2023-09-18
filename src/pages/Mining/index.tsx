@@ -86,20 +86,23 @@ function Mining() {
   }
 
   const adsCallback = () => {
-    setTimeout(() => {
-      setAdsLoadingFalse()
-    }, 1000);
+    setAdsLoadingFalse()
   }
 
-  const fetchAds = () => {
+  const fetchAds = async () => {
     const token = getToken()
     if (!token) {
       setshowDialog(true)
       return
     }
-    window.misesEthereum?.showAds?.()
+   try {
     setAdsLoadingTrue()
+    await window.misesEthereum?.showAds?.()
     adsCallback()
+   } catch (error) {
+    console.log(error, 'adsCallback()')
+    adsCallback()
+   }
   }
 
   const { accountData } = usePageValue()

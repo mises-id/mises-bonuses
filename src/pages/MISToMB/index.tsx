@@ -376,11 +376,13 @@ function MISToMB() {
         </div>
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
-        <p className='text-[16px] font-200 text-gray-500 leading-6 p-10'>
-        The maximum redeemable quantity is based on the snapshot on Sept 7th. 
-        Please note that only one redemption is allowed, so make sure to redeem all at once. 
-        The minimum redemption quantity is <span className='font-bold'>{accountData?.mb_airdrop?.min_redeem_mis_amount}</span> MIS.
-        </p>
+        <div className='text-[16px] font-200 text-gray-500 leading-8 p-10 pre whitespace-pre-line'>
+          {`1. The maximum redeemable quantity is based on the snapshot on Sept 7th.
+2. The exchange rate between MIS and MB is 1:1.
+3. Only one redemption is allowed, make sure to redeem all at once.
+4. The minimum redemption quantity is ${accountData?.mb_airdrop?.min_redeem_mis_amount} MIS.`}
+        <p className='mt-10 text-gray-300'>*The gas fee will be deducted from the exchanged MB, so the actual amount of tokens received would be less than the estimated amount.</p>
+        </div>
       </div>
       <Popup
         position='bottom'
