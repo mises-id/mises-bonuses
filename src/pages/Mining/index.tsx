@@ -2,7 +2,7 @@ import { fetchAdMiningData, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useRequest } from 'ahooks';
-import { NavBar, List, Button, Popup } from 'antd-mobile'
+import { NavBar, List, Button, Popup, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { hooks } from '@/components/Web3Provider/metamask'
@@ -87,6 +87,7 @@ function Mining() {
 
   const adsCallback = () => {
     setAdsLoadingFalse()
+    refresh()
   }
 
   const fetchAds = async () => {
@@ -99,8 +100,10 @@ function Mining() {
     setAdsLoadingTrue()
     await window.misesEthereum?.showAds?.()
     adsCallback()
-   } catch (error) {
-    console.log(error, 'adsCallback()')
+   } catch (error: any) {
+    if(error.code === 1) {
+      Toast.show(error.message)
+    }
     adsCallback()
    }
   }
