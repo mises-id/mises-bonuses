@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { hooks } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
+import Cookies from 'js-cookie';
 
 const { useAccounts, useProvider, useIsActive } = hooks
 
@@ -64,6 +65,7 @@ function Mining() {
       signMsg().then(auth => {
         signin(auth).then(res => {
           setToken('token', res.token)
+          Cookies.set('token', res.token, { domain: 'mises.site' });
           localStorage.setItem('ethAccount', currentAccount)
           refresh()
           setLoginTrue()
@@ -104,7 +106,7 @@ function Mining() {
     if(error.code === 1) {
       Toast.show(error.message)
     }
-    adsCallback()
+    setAdsLoadingFalse()
    }
   }
 
