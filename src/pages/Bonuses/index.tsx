@@ -286,10 +286,8 @@ function Bonuses() {
     })
   }, [])
 
-  const addMB = () => {
-    connector.watchAsset?.(MBCoinInfo)
+  const closeConfirm = () => {
     setshowConfirmDialog(false)
-    localStorage.setItem('addTokened', '1')
   }
 
   const { accountData } = usePageValue()
@@ -389,11 +387,11 @@ function Bonuses() {
         }}>
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-            Your request for exchange has been duly acknowledged and is anticipated to be processed within several hours. Kindly monitor your wallet for updates.
+          Congratulations！You've successfully redeemed your MB. It will be sent to your Mises wallet within 24 hours.
           </p>
           <div className='flex justify-center items-center mt-40'>
-            <Button className='w-[40%]' onClick={addMB} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-              <span className='text-white'>Add $MB</span>
+            <Button className='w-[40%]' onClick={closeConfirm} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+              <span className='text-white'>Confirm</span>
             </Button>
           </div>
         </div>

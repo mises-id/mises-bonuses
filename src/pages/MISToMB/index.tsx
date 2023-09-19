@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './index.less'
 import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance, removeToken } from '@/utils'
+import { MBCoinInfo, MisInfo, formatAmount, getErc20Balance, removeToken } from '@/utils'
 import { useMisesWallet } from '@/hooks/useMisesWallet'
 import { getAmount } from '@/hooks/useInitialBankBalance'
 import { useBoolean, useRequest } from 'ahooks'
@@ -195,23 +195,6 @@ function MISToMB() {
     }
   }
 
-  const checkChainId = useCallback(
-    async () => {
-      try {
-        if (chainId !== MBChainId) {
-          return await connector.activate(MBChainId)
-        }
-        return Promise.resolve()
-      } catch (error: any) {
-        if (error.code === ErrorCode.addChain) {
-          return connector.activate(MBChainInfo)
-        }
-        return Promise.reject(error)
-      }
-    },
-    [connector, chainId],
-  )
-
   const checkUserAddress = async () => {
     console.log(accounts)
     if (accounts && accounts.length) {
@@ -265,9 +248,7 @@ function MISToMB() {
     })
   }, [])
 
-  const addMB = async () => {
-    await checkChainId();
-    connector.watchAsset?.(MBCoinInfo)
+  const closeConfirm = async () => {
     setshowConfirmDialog(false)
   }
 
@@ -395,13 +376,14 @@ function MISToMB() {
         onClose={() => {
           setshowConfirmDialog(false)
         }}>
+        
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-            Your request for exchange has been duly acknowledged and is anticipated to be processed within several hours. Kindly monitor your wallet for updates.
+          Congratulations！You've successfully redeemed your MB. It will be sent to your Mises wallet within 24 hours.
           </p>
           <div className='flex justify-center items-center mt-40'>
-            <Button className='w-[40%]' onClick={addMB} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-              <span className='text-white'>Add $MB</span>
+            <Button className='w-[40%]' onClick={closeConfirm} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+              <span className='text-white'>Confirm</span>
             </Button>
           </div>
         </div>
