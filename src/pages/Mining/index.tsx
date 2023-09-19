@@ -9,12 +9,12 @@ import { hooks } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
 import Cookies from 'js-cookie';
 
-const { useAccounts, useProvider, useIsActive } = hooks
+const { useAccounts, useProvider, useIsActive, useIsActivating } = hooks
 
 function Mining() {
   const [showDialog, setshowDialog] = useState(false)
   const accounts = useAccounts()
-  // const isActivating = useIsActivating()
+  const isActivating = useIsActivating()
   const { connector } = useWeb3React();
 
   const isActive = useIsActive()
@@ -33,6 +33,12 @@ function Mining() {
     return ''
   }, [accounts])
 
+  useEffect(() => {
+    console.log(accounts)
+  }, [isActive, accounts])
+  
+  
+  const [signLoading, { setTrue: setsignLoadingTrue, setFalse: setsignLoadingFalse }] = useBoolean(false)
 
   const signMsg = async () => {
     try {
@@ -40,21 +46,26 @@ function Mining() {
       if (accounts && accounts.length) {
         const address = accounts[0]
         const sigMsg = `address=${address}&nonce=${timestamp}`
+        setsignLoadingTrue()
         const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
         if (personalSignMsg) {
           const auth = `${sigMsg}&sig=${personalSignMsg}`
+          setsignLoadingFalse()
           return auth
         }
+        setsignLoadingFalse()
         return Promise.reject({
           code: 9998,
           message: 'Not found personal sign message'
         })
       }
+      setsignLoadingFalse()
       return Promise.reject({
         code: 9998,
         message: 'Invalid address'
       })
     } catch (error) {
+      setsignLoadingFalse()
       return Promise.reject(error)
     }
   }
@@ -72,6 +83,8 @@ function Mining() {
           refresh()
           setshowDialog(false)
         })
+      }).catch(error => {
+        Toast.show(error.message)
       })
     }
   }
@@ -82,8 +95,12 @@ function Mining() {
 
 
   const connectWallet = async () => {
-    await connector.activate()
-    loginMises()
+    try {
+      await connector.activate()
+      loginMises()
+    } catch (error: any) {
+      Toast.show(error.message)
+    }
   }
 
   const adsCallback = () => {
@@ -134,15 +151,19 @@ function Mining() {
   }, [error])
 
   const buttonText = useMemo(() => {
+    if(isActivating) {
+      return 'Connect Wallet...'
+    }
     if(!isActive || !accounts) {
-      return 'Connect wallet'
+      return 'Connect Mises ID'
     }
     const token = getToken();
     if(accounts && !token) {
       return 'Sign Message'
     }
+    return 'Connect Mises ID'
     //
-  }, [accounts, isActive])
+  }, [accounts, isActive, isActivating])
 
 
   const RenderView = () => {
@@ -200,8 +221,8 @@ function Mining() {
       <div className='bg-white px-15 pb-30'>
         <p className='text-25 text-[#333333]'>About Mining</p>
         <p className='text-14 leading-6 text-[#333333] py-20 mb-20'>Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.</p>
-        <Button block shape='rounded' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-          <span className='text-white block py-8 text-18'>{buttonText}</span>
+        <Button block shape='rounded' loading={signLoading} onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", 'padding': '12px 0' }}>
+          <span className='text-white block text-18'>{buttonText}</span>
         </Button>
       </div>
     </div>
