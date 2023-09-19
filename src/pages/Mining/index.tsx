@@ -20,12 +20,15 @@ function Mining() {
   const isActive = useIsActive()
 
   const provider = useProvider()
-  const [login, { setTrue: setLoginTrue, setFalse: setLoginFalse }] = useBoolean(false)
   const [adsLoading, { setTrue: setAdsLoadingTrue, setFalse: setAdsLoadingFalse }] = useBoolean(false)
-  console.log(login)
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
       return accounts[0]
+    }
+    const ethAccount = localStorage.getItem('ethAccount');
+    const token = getToken()
+    if(ethAccount && token) {
+      return ethAccount
     }
     return ''
   }, [accounts])
@@ -60,7 +63,6 @@ function Mining() {
     const oldConnectAddress = localStorage.getItem('ethAccount')
     const token = getToken()
     if ((oldConnectAddress !== currentAccount || !token) && provider) {
-      setLoginFalse()
       removeToken('token')
       signMsg().then(auth => {
         signin(auth).then(res => {
@@ -68,10 +70,7 @@ function Mining() {
           Cookies.set('token', res.token, { domain: 'mises.site' });
           localStorage.setItem('ethAccount', currentAccount)
           refresh()
-          setLoginTrue()
           setshowDialog(false)
-        }).catch(() => {
-          setLoginFalse()
         })
       })
     }
@@ -121,7 +120,6 @@ function Mining() {
     const token = getToken()
     if (token) {
       run()
-      setLoginTrue()
     }
     // eslint-disable-next-line
   }, [])
@@ -130,7 +128,7 @@ function Mining() {
     const errorResponse = (error as any)?.response
     if (error && errorResponse && errorResponse.status === 403 && errorResponse.data.code === 403002) {
       localStorage.removeItem('token');
-      setLoginFalse()
+      Cookies.remove('token');
     }
     // eslint-disable-next-line
   }, [error])
@@ -147,12 +145,10 @@ function Mining() {
   }, [accounts, isActive])
 
 
-  return (
-    <div>
-      <NavBar className={`fixed left-0 right-0 top-0 z-10`} backArrow={false}>
-        Mining
-      </NavBar>
-      <div className="pt-55 px-15">
+  const RenderView = () => {
+    const token = getToken();
+    if(token) {
+      return <div className="pt-55 px-15">
         {currentAccount && <div className='flex justify-end'>
           <div className='rounded-2xl p-10 bg-white dark:bg-[#EEEFFF]'>
             {shortenAddress(currentAccount)}
@@ -198,6 +194,25 @@ function Mining() {
           </div>
         </div>
       </div>
+    }
+    return <div className="pt-45">
+      <img src="./images/me-bg.png" alt="bg" width="100%" className="block"/>
+      <div className='bg-white px-15 pb-30'>
+        <p className='text-25 text-[#333333]'>About Mining</p>
+        <p className='text-14 leading-6 text-[#333333] py-20 mb-20'>Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.</p>
+        <Button block shape='rounded' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+          <span className='text-white block py-8 text-18'>{buttonText}</span>
+        </Button>
+      </div>
+    </div>
+  }
+
+  return (
+    <div>
+      <NavBar className="fixed left-0 right-0 top-0 z-10 bg-white" backArrow={false}>
+        Mining
+      </NavBar>
+      <RenderView />
       <Popup
         position='bottom'
         showCloseButton
