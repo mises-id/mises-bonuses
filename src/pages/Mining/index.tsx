@@ -155,7 +155,7 @@ function Mining() {
           </div>
         </div>}
         <div className='border-1 border-solid rounded-[10px] px-15 py-20 border-gray-200 dark:border-gray-600 text-14 mt-10 leading-7  text-gray-600 dark:text-gray-300 bg-white dark:bg-transparent'>
-          Upon successfully finishing the assigned tasks, you will be rewarded with mises bonuses,
+          Upon successfully finishing the assigned tasks, you will be rewarded with mises reward points,
           which can later be converted into MB.
         </div>
         <div className='mt-50'>

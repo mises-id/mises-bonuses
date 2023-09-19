@@ -25,7 +25,7 @@ export const MBCoinInfo = {
 
 export const BonusesInfo = {
   "address": '',
-  "symbol": 'Bonuses',
+  "symbol": 'pts',
   "decimals": 1,
   "image": 'logo.png'
 }

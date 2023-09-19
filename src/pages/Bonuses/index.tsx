@@ -312,7 +312,7 @@ function Bonuses() {
     if(accountData?.bonus?.min_redeem_bonus_amount && value) {
       const redeemCompared = BigNumber(value).comparedTo(accountData?.bonus.min_redeem_bonus_amount)
       if(redeemCompared === -1) {
-        seterrorTxt('Insufficient bonuses')
+        seterrorTxt('Insufficient Reward Points')
         return 
       }
     }
