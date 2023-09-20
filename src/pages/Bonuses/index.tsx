@@ -326,7 +326,7 @@ function Bonuses() {
   return (
     <div>
       <div className='flex justify-between'>
-        <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>Bonus</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
+        <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>Rewards</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
         {currentAccount && <div className='flex items-center mr-15'>
           <div className='rounded-2xl p-10 bg-white dark:bg-[#131a2a]'>
             {shortenAddress(currentAccount)}
