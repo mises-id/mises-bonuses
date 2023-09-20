@@ -5,7 +5,7 @@ import { useBoolean, useRequest } from 'ahooks';
 import { List, Button, Popup, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { hooks } from '@/components/Web3Provider/metamask'
+import { hooks, metaMask } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
 import Cookies from 'js-cookie';
 import { SendOutline } from 'antd-mobile-icons';
@@ -89,6 +89,14 @@ function Mining() {
       })
     }
   }
+
+  // attempt to connect eagerly on mount
+  useEffect(() => {
+    metaMask.connectEagerly().catch(() => {
+      console.debug('Failed to connect eagerly to metamask')
+    })
+  }, [])
+
   useEffect(() => {
     loginMises()
     // eslint-disable-next-line
