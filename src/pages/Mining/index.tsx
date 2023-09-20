@@ -98,7 +98,7 @@ function Mining() {
   }, [])
 
   useEffect(() => {
-    loginMises()
+    // loginMises()
     // eslint-disable-next-line
   }, [currentAccount, provider])
 
@@ -163,16 +163,10 @@ function Mining() {
     if(isActivating) {
       return 'Connect Wallet...'
     }
-    if(!isActive || !accounts) {
-      return 'Connect Mises ID'
-    }
-    const token = getToken();
-    if(accounts && !token) {
-      return 'Sign Message'
-    }
+
     return 'Connect Mises ID'
     //
-  }, [accounts, isActive, isActivating])
+  }, [isActivating])
 
 
   const RenderView = () => {

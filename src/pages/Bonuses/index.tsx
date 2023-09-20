@@ -65,16 +65,16 @@ function Bonuses() {
       settoValue('')
       setLoginFalse()
       localStorage.removeItem('token')
-      signMsg().then(auth => {
-        signin(auth).then(res=> {
-          setToken('token', res.token);
-          localStorage.setItem('ethAccount', currentAccount)
-          refresh()
-          setLoginTrue()
-        }).catch(() => {
-          setLoginFalse()
-        })
-      })
+      // signMsg().then(auth => {
+      //   signin(auth).then(res=> {
+      //     setToken('token', res.token);
+      //     localStorage.setItem('ethAccount', currentAccount)
+      //     refresh()
+      //     setLoginTrue()
+      //   }).catch(() => {
+      //     setLoginFalse()
+      //   })
+      // })
     }
     // eslint-disable-next-line
   }, [currentAccount, provider])
@@ -247,7 +247,6 @@ function Bonuses() {
       return Promise.reject(error)
     }
   }
-  console.log(currentAccount, "currentAccount=====", accounts)
 
   const checkSign = async () => {
     try {
@@ -270,8 +269,8 @@ function Bonuses() {
   const buttonClick = async () => {
     try {
       await connectWallet();
-      await checkChainId();
       await checkSign()
+      await checkChainId();
       await swap()
     } catch (error: any) {
       setFalse()

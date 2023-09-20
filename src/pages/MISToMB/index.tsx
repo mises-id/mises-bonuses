@@ -33,6 +33,7 @@ function MISToMB() {
   const { activate: misesProviderActivate, isActivating: misesWalletIsActivating, account: misesAccount, checkAccountData, misesAccountData, sendMisTx, refreshLimit } = useMisesWallet();
   // const chainId = useChainId()
   const accounts = useAccounts()
+  
   const isActivating = useIsActivating()
 
   const isActive = useIsActive()
