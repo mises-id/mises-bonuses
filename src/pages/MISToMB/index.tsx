@@ -13,7 +13,7 @@ import { useLCDClient } from '@/hooks/uselcdClient'
 import BigNumber from 'bignumber.js'
 import { claimAirdrop } from '@/api'
 import { usePageValue } from '@/components/pageProvider'
-const { useChainId, useAccounts, useIsActivating, useIsActive } = hooks
+const { useAccounts, useIsActivating, useIsActive } = hooks
 
 function MISToMB() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
@@ -31,7 +31,7 @@ function MISToMB() {
   const { connector } = useWeb3React();
 
   const { activate: misesProviderActivate, isActivating: misesWalletIsActivating, account: misesAccount, checkAccountData, misesAccountData, sendMisTx, refreshLimit } = useMisesWallet();
-  const chainId = useChainId()
+  // const chainId = useChainId()
   const accounts = useAccounts()
   const isActivating = useIsActivating()
 
@@ -321,7 +321,7 @@ function MISToMB() {
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
       <div className='container bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px]'>
         <div className="flex justify-between items-center px-8 py-12 mb-8 text-18">
-          <p className="title">Redeem</p>
+          <p className="text-16">Redeem</p>
         </div>
         <TokenInput
           coinInfo={MisInfo}
@@ -357,7 +357,7 @@ function MISToMB() {
         </div>
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
-        <div className='text-[16px] font-200 text-gray-500 leading-8 p-10 pre whitespace-pre-line'>
+        <div className='text-[16px] font-200 text-gray-500 leading-6 p-10 pre whitespace-pre-line'>
           {`1. The maximum redeemable quantity is based on the snapshot on Sept 7th.
 2. The exchange rate between MIS and MB is 1:1.
 3. Only one redemption is allowed, make sure to redeem all at once.

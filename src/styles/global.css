@@ -89,16 +89,21 @@
   position: relative;
 }
 
+.inset-x-0 {
+  left: 0px;
+  right: 0px;
+}
+
+.top-0 {
+  top: 0px;
+}
+
 .left-0 {
   left: 0px;
 }
 
 .right-0 {
   right: 0px;
-}
-
-.top-0 {
-  top: 0px;
 }
 
 .z-10 {
@@ -157,6 +162,22 @@
 
 .mb-20 {
   margin-bottom: 20px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
+.mt-15 {
+  margin-top: 15px;
+}
+
+.ml-10 {
+  margin-left: 10px;
+}
+
+.mr-15 {
+  margin-right: 15px;
 }
 
 .block {
@@ -350,6 +371,11 @@
   padding-right: 15px;
 }
 
+.py-10 {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 .py-20 {
   padding-top: 20px;
   padding-bottom: 20px;
@@ -358,16 +384,6 @@
 .py-8 {
   padding-top: 8px;
   padding-bottom: 8px;
-}
-
-.py-10 {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.py-5 {
-  padding-top: 5px;
-  padding-bottom: 5px;
 }
 
 .pb-5 {
@@ -380,22 +396,6 @@
 
 .pr-12 {
   padding-right: 12px;
-}
-
-.pt-55 {
-  padding-top: 55px;
-}
-
-.pt-45 {
-  padding-top: 45px;
-}
-
-.pt-50 {
-  padding-top: 50px;
-}
-
-.pb-20 {
-  padding-bottom: 20px;
 }
 
 .pb-30 {
@@ -430,10 +430,6 @@
   font-size: 25px;
 }
 
-.text-19 {
-  font-size: 19px;
-}
-
 .font-bold {
   font-weight: 700;
 }
@@ -448,10 +444,6 @@
 
 .leading-7 {
   line-height: 1.75rem;
-}
-
-.leading-4 {
-  line-height: 1rem;
 }
 
 .leading-6 {
@@ -498,6 +490,21 @@
   color: rgb(51 51 51 / var(--tw-text-opacity));
 }
 
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+
+.text-gray-100 {
+  --tw-text-opacity: 1;
+  color: rgb(243 244 246 / var(--tw-text-opacity));
+}
+
+.underline {
+  -webkit-text-decoration-line: underline;
+          text-decoration-line: underline;
+}
+
 .filter {
   -webkit-filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
           filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
@@ -518,7 +525,8 @@
     --icon-color: rgb(152, 161, 192);
     --adm-color-text: white;
     --adm-color-background: #000000;
-    --adm-color-border: rgb(75, 85, 99)
+    --adm-color-border: rgb(75, 85, 99);
+    --adm-color-primary: #5d61ff
     
   }
 }
@@ -532,7 +540,8 @@
     --icon-color: #7780a0;
     --adm-color-text: #0d111c;
     --adm-color-background:#f7f7f7;
-    --adm-color-border: #eee
+    --adm-color-border: #eee;
+    --adm-color-primary: #5d61ff
     
   }
 }

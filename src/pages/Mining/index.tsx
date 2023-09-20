@@ -2,12 +2,13 @@ import { fetchAdMiningData, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useRequest } from 'ahooks';
-import { NavBar, List, Button, Popup, Toast } from 'antd-mobile'
+import { List, Button, Popup, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { hooks } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
 import Cookies from 'js-cookie';
+import { SendOutline } from 'antd-mobile-icons';
 
 const { useAccounts, useProvider, useIsActive, useIsActivating } = hooks
 
@@ -169,15 +170,24 @@ function Mining() {
   const RenderView = () => {
     const token = getToken();
     if(token) {
-      return <div className="pt-55 px-15">
-        {currentAccount && <div className='flex justify-end'>
-          <div className='rounded-2xl p-10 bg-white dark:bg-[#EEEFFF]'>
+      // 
+      return <div className="px-15">
+        <div className='flex justify-between items-center py-10'>
+          <p className='text-16 m-0 font-bold text-[#5d61ff]'>Mises Mining</p>
+          {currentAccount && <div className='rounded-2xl p-10 bg-white dark:bg-[#131a2a]'>
             {shortenAddress(currentAccount)}
-          </div>
-        </div>}
+          </div>}
+        </div>
         <div className='border-1 border-solid rounded-[10px] px-15 py-20 border-gray-200 dark:border-gray-600 text-14 mt-10 leading-7  text-gray-600 dark:text-gray-300 bg-white dark:bg-transparent'>
           Upon successfully finishing the assigned tasks, you will be rewarded with mises reward points,
           which can later be converted into MB.
+          <div className='flex justify-end mt-15'>
+            <a href="https://mining.test.mises.site/bonuses" target='_blank' rel="noreferrer">
+              Link to redeem
+              <SendOutline className='ml-5'/>
+            </a>
+            
+          </div>
         </div>
         <div className='mt-50'>
           <div className='border-1 border-solid rounded-[10px] overflow-hidden border-gray-200 dark:border-gray-600 bg-white dark:bg-transparent'>
@@ -216,7 +226,8 @@ function Mining() {
         </div>
       </div>
     }
-    return <div className="pt-45">
+    return <>
+      <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
       <img src="./images/me-bg.png" alt="bg" width="100%" className="block"/>
       <div className='bg-white px-15 pb-30'>
         <p className='text-25 text-[#333333]'>About Mining</p>
@@ -225,14 +236,14 @@ function Mining() {
           <span className='text-white block text-18'>{buttonText}</span>
         </Button>
       </div>
-    </div>
+    </>
   }
 
   return (
-    <div>
-      <NavBar className="fixed left-0 right-0 top-0 z-10 bg-white" backArrow={false}>
+    <>
+      {/* <NavBar className="fixed left-0 right-0 top-0 z-10 bg-white" backArrow={false}>
         Mining
-      </NavBar>
+      </NavBar> */}
       <RenderView />
       <Popup
         position='bottom'
@@ -256,7 +267,7 @@ function Mining() {
           </div>
         </div>
       </Popup>
-    </div>
+    </>
   )
 }
 

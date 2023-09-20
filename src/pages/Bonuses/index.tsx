@@ -4,7 +4,7 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken, setToken } from '@/utils'
+import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken, setToken, shortenAddress } from '@/utils'
 import { fetchBonusCount, redeemBonusCount, signin } from '@/api'
 import { useBoolean, useRequest } from 'ahooks'
 import { usePageValue } from '@/components/pageProvider'
@@ -325,10 +325,18 @@ function Bonuses() {
 
   return (
     <div>
-      <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>Bonus</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
+      <div className='flex justify-between'>
+        <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>Bonus</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
+        {currentAccount && <div className='flex items-center mr-15'>
+          <div className='rounded-2xl p-10 bg-white dark:bg-[#131a2a]'>
+            {shortenAddress(currentAccount)}
+          </div>
+        </div>}
+      </div>
       <div className='container bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px]'>
-        <div className="flex justify-between items-center px-8 py-12 mb-8 text-18">
+        <div className="flex items-center px-8 py-12 mb-8 text-18">
           <p className="title">Redeem</p>
+          <p className="title ml-10 text-gray-400" onClick={() => {window.open('https://mining.test.mises.site/mining', 'target=_blank')}}>Mining</p>
         </div>
         <TokenInput
           coinInfo={BonusesInfo}
@@ -347,7 +355,6 @@ function Bonuses() {
           value={toValue}
           readOnly
           balance={toBalance}
-          account={currentAccount}
         />
         <div className='mt-10'>
           <Button
@@ -367,7 +374,7 @@ function Bonuses() {
           {/* <div className='w-60 h-60 flex-none mt-5'>
             <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path d="M640 224c19.2 0 38.4 9.6 51.2 25.6l118.4 156.8c19.2 25.6 16 57.6-3.2 80l-246.4 275.2c-22.4 25.6-64 28.8-89.6 6.4-3.2 0-3.2-3.2-3.2-3.2l-249.6-275.2c-19.2-22.4-22.4-57.6-3.2-83.2l118.4-156.8c12.8-16 32-25.6 51.2-25.6h256z m0 64h-256l-118.4 156.8 246.4 275.2 246.4-275.2L640 288z m-32 96c19.2 0 32 12.8 32 32s-12.8 32-32 32h-192c-19.2 0-32-12.8-32-32s12.8-32 32-32h192z" fill="#5D61FF" data-spm-anchor-id="a313x.search_index.0.i0.72cd3a81Rm0qVB"></path></svg>
           </div> */}
-          <div className='text-[16px] font-200 text-gray-500 leading-8 p-10 pre whitespace-pre-line'>
+          <div className='text-[16px] font-200 text-gray-500 leading-6 p-10 pre whitespace-pre-line'>
             {`1. The exchange rate between Bonus and MB is 1:${accountData?.bonus.bonus_to_mb_rate}
 2. Minimum redemption of ${accountData?.bonus?.min_redeem_bonus_amount } Bonus.`}
             <p className='mt-10 text-gray-300'>*The gas fee will be deducted from the exchanged MB, so the actual amount of tokens received would be less than the estimated amount.</p>
