@@ -1,5 +1,5 @@
 diff --git a/node_modules/@metamask/detect-provider/dist/detect-provider.js b/node_modules/@metamask/detect-provider/dist/detect-provider.js
-index 4c72869..7e602d5 100644
+index 4c72869..ee981e9 100644
 --- a/node_modules/@metamask/detect-provider/dist/detect-provider.js
 +++ b/node_modules/@metamask/detect-provider/dist/detect-provider.js
 @@ -1,66 +1,67 @@
@@ -125,8 +125,7 @@ index 4c72869..7e602d5 100644
 +    
 +    },{}]},{},[1])(1)
 +    });
-     
-\ No newline at end of file
+ 
 -},{}]},{},[1])(1)
 -});
 diff --git a/node_modules/@metamask/detect-provider/dist/detect-provider.min.js b/node_modules/@metamask/detect-provider/dist/detect-provider.min.js
@@ -139,13 +138,14 @@ index a5262e4..fb49cd7 100644
 +!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).detectEthereumProvider=e()}}((function(){return function({mustBeMetaMask:e=!1,silent:t=!1,timeout:o=3e3}={}){!function(){if("boolean"!=typeof e)throw new Error("@metamask/detect-provider: Expected option 'mustBeMetaMask' to be a boolean.");if("boolean"!=typeof t)throw new Error("@metamask/detect-provider: Expected option 'silent' to be a boolean.");if("number"!=typeof o)throw new Error("@metamask/detect-provider: Expected option 'timeout' to be a number.")}();let n=!1;return new Promise(i=>{function r(){if(n)return;n=!0,window.removeEventListener("ethereum#initialized",r);const{misesEthereum:o}=window;if(!o||e&&!o.isMetaMask){const n=e&&o?"Non-MetaMask window.misesEthereum detected.":"Unable to detect window.misesEthereum.";!t&&console.error("@metamask/detect-provider:",n),i(null)}else i(o)}window.misesEthereum?r():(window.addEventListener("ethereum#initialized",r,{once:!0}),setTimeout(()=>{r()},o))})}}));
 \ No newline at end of file
 diff --git a/node_modules/@metamask/detect-provider/dist/index.d.ts b/node_modules/@metamask/detect-provider/dist/index.d.ts
-index 59d15f3..f45b265 100644
+index 59d15f3..daafe0b 100644
 --- a/node_modules/@metamask/detect-provider/dist/index.d.ts
 +++ b/node_modules/@metamask/detect-provider/dist/index.d.ts
-@@ -1,9 +1,10 @@
+@@ -1,9 +1,11 @@
  interface EthereumProvider {
      isMetaMask?: boolean;
 +    showAds: () => void;
++    signMessageForAuth: (address: string, nonce: string) => ({sig: string});
  }
  declare global {
      interface Window {

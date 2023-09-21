@@ -4,12 +4,12 @@ import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken, setToken, shortenAddress } from '@/utils'
+import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken, removeToken, setToken, shortenAddress } from '@/utils'
 import { fetchBonusCount, redeemBonusCount, signin } from '@/api'
-import { useBoolean, useRequest } from 'ahooks'
+import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks'
 import { usePageValue } from '@/components/pageProvider'
 import BigNumber from 'bignumber.js'
-const { useChainId, useAccounts, useIsActivating, useIsActive, useProvider } = hooks
+const { useChainId, useAccounts, useIsActivating, useProvider } = hooks
 
 function Bonuses() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
@@ -25,8 +25,6 @@ function Bonuses() {
 
   const accountRef = useRef<string>('')
 
-  const providerRef = useRef<any>('')
-
   // const [formBalance, setformBalance] = useState<string | undefined>('')
   const [toBalance, settoBalance] = useState<string | undefined>('')
 
@@ -36,7 +34,6 @@ function Bonuses() {
   const accounts = useAccounts()
   const isActivating = useIsActivating()
 
-  const isActive = useIsActive()
 
   const provider = useProvider()
 
@@ -56,36 +53,47 @@ function Bonuses() {
     }
     // eslint-disable-next-line
   }, [])
-  
-  useEffect(() => {
-    const oldConnectAddress = localStorage.getItem('ethAccount')
 
-    if(currentAccount && oldConnectAddress !== currentAccount && provider) {
+  const documentVisibility = useDocumentVisibility();
+
+  useEffect(() => {
+    console.log(`Current document visibility state: ${documentVisibility}`);
+    if(documentVisibility === 'visible') {
+      const oldConnectAddress = localStorage.getItem('ethAccount')
+
+      if(currentAccount && oldConnectAddress !== currentAccount) {
+        setformValue('')
+        settoValue('')
+        setLoginFalse()
+        removeToken('token')
+        signMsg().then(auth => {
+          signin(auth).then(res=> {
+            setToken('token', res.token);
+            localStorage.setItem('ethAccount', currentAccount)
+            refresh()
+            setLoginTrue()
+          }).catch(() => {
+          })
+        })
+      }
+    }
+    if(!currentAccount) {
       setformValue('')
       settoValue('')
+      removeToken('token')
+      settoBalance('')
+      refresh()
+      localStorage.removeItem('ethAccount')
       setLoginFalse()
-      localStorage.removeItem('token')
-      // signMsg().then(auth => {
-      //   signin(auth).then(res=> {
-      //     setToken('token', res.token);
-      //     localStorage.setItem('ethAccount', currentAccount)
-      //     refresh()
-      //     setLoginTrue()
-      //   }).catch(() => {
-      //     setLoginFalse()
-      //   })
-      // })
     }
-    // eslint-disable-next-line
-  }, [currentAccount, provider])
 
-  useEffect(() => {
-    if(provider) providerRef.current = provider
+    console.log(currentAccount, "currentAccount")
+    // eslint-disable-next-line
+  }, [documentVisibility, currentAccount]);
+
+
   
-  }, [provider])
   
-  
-  // const ENSNames = useENSNames(provider)
   const { data: formBalance, run, refresh } = useRequest(async () => {
     const token = getToken()
     if(!token) return '';
@@ -128,8 +136,8 @@ function Bonuses() {
     if (isActivating) {
       return 'Connecting wallet...'
     }
-
-    if (!isActive || !login) {
+    console.log(login)
+    if (!login) {
       return 'Connect Wallet'
     }
 
@@ -142,16 +150,13 @@ function Bonuses() {
     }
 
     return 'Redeem'
-  }, [isActive, isActivating, errorTxt, formValue, toValue, login])
+  }, [isActivating, errorTxt, formValue, toValue, login])
 
   // button status 
   const buttonDisabled = useMemo(() => {
     if(!login) return false;
     if (isActivating) {
       return true;
-    }
-    if(!isActive) {
-      return false;
     }
 
     if(errorTxt) {
@@ -162,11 +167,11 @@ function Bonuses() {
       return true
     }
     return false;
-  }, [isActivating, errorTxt, formValue, toValue, isActive, login])
+  }, [isActivating, errorTxt, formValue, toValue, login])
 
   const connectWallet = async () => {
     try {
-      if (!isActivating && !isActive) {
+      if (!isActivating) {
         await connector.activate()
       }
       return Promise.resolve()
@@ -202,12 +207,12 @@ function Bonuses() {
       const timestamp = new Date().getTime();
       if (accountRef.current) {
         const address = accountRef.current
+        const nonce = `${timestamp}`;
         const sigMsg = `address=${address}&nonce=${timestamp}`
         console.log(provider, "provider")
-        const connectProvider = provider || providerRef.current
-        const personalSignMsg = await connectProvider?.send('personal_sign', [address, sigMsg])
-        if(personalSignMsg) {
-          const auth = `${sigMsg}&sig=${personalSignMsg}`
+        const data = await window.misesEthereum?.signMessageForAuth(address, nonce)
+        if (data?.sig) {
+          const auth = `${sigMsg}&sig=${data?.sig}`
           return auth
         }
         return Promise.reject({

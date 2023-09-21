@@ -1,7 +1,7 @@
 import { fetchAdMiningData, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
-import { useBoolean, useRequest } from 'ahooks';
+import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
 import { List, Button, Popup, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 
@@ -10,7 +10,7 @@ import { useWeb3React } from '@web3-react/core';
 import Cookies from 'js-cookie';
 import { SendOutline } from 'antd-mobile-icons';
 
-const { useAccounts, useProvider, useIsActive, useIsActivating } = hooks
+const { useAccounts, useIsActivating } = hooks
 
 function Mining() {
   const [showDialog, setshowDialog] = useState(false)
@@ -18,25 +18,15 @@ function Mining() {
   const isActivating = useIsActivating()
   const { connector } = useWeb3React();
 
-  const isActive = useIsActive()
 
-  const provider = useProvider()
+  // const provider = useProvider()
   const [adsLoading, { setTrue: setAdsLoadingTrue, setFalse: setAdsLoadingFalse }] = useBoolean(false)
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
       return accounts[0]
     }
-    const ethAccount = localStorage.getItem('ethAccount');
-    const token = getToken()
-    if(ethAccount && token) {
-      return ethAccount
-    }
     return ''
   }, [accounts])
-
-  useEffect(() => {
-    console.log(accounts)
-  }, [isActive, accounts])
   
   
   const [signLoading, { setTrue: setsignLoadingTrue, setFalse: setsignLoadingFalse }] = useBoolean(false)
@@ -46,11 +36,13 @@ function Mining() {
       const timestamp = new Date().getTime();
       if (accounts && accounts.length) {
         const address = accounts[0]
+        const nonce = `${timestamp}`;
         const sigMsg = `address=${address}&nonce=${timestamp}`
         setsignLoadingTrue()
-        const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
-        if (personalSignMsg) {
-          const auth = `${sigMsg}&sig=${personalSignMsg}`
+        // const personalSignMsg = await provider?.send('personal_sign', [address, sigMsg])
+        const data = await window.misesEthereum?.signMessageForAuth(address, nonce)
+        if (data?.sig) {
+          const auth = `${sigMsg}&sig=${data?.sig}`
           setsignLoadingFalse()
           return auth
         }
@@ -73,8 +65,8 @@ function Mining() {
 
   const loginMises = () => {
     const oldConnectAddress = localStorage.getItem('ethAccount')
-    const token = getToken()
-    if ((oldConnectAddress !== currentAccount || !token) && provider) {
+    if (currentAccount && oldConnectAddress !== currentAccount) {
+      console.log(1111)
       removeToken('token')
       signMsg().then(auth => {
         signin(auth).then(res => {
@@ -97,10 +89,21 @@ function Mining() {
     })
   }, [])
 
+  const documentVisibility = useDocumentVisibility();
+
   useEffect(() => {
-    // loginMises()
+    if(!currentAccount) {
+      localStorage.removeItem('ethAccount')
+      removeToken()
+      Cookies.remove('token')
+      console.log(accounts, 'accounts')
+    }
+    console.log(`Current document visibility state: ${documentVisibility}`);
+    if(documentVisibility === 'visible') {
+      loginMises()
+    }
     // eslint-disable-next-line
-  }, [currentAccount, provider])
+  }, [documentVisibility, currentAccount]);
 
 
   const connectWallet = async () => {
