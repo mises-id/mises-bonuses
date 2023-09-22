@@ -16,7 +16,7 @@ type CutonFallBackT =
   | React.ReactFragment
   | React.ReactPortal
   | null
-type ChildT = React.LazyExoticComponent<() => JSX.Element> | React.FC
+type ChildT = React.FC
 
 // 加载异步组件的loading
 const SuspenseWrapper = (Child: ChildT, cutonFallBack?: CutonFallBackT):any => {
