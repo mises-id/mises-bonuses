@@ -326,6 +326,10 @@ function Bonuses() {
       settoValue(value)
     }
   }
+  const addMB = async () => {
+    await checkChainId()
+    connector.watchAsset?.(MBCoinInfo)
+  }
 
   return (
     <div>
@@ -382,6 +386,7 @@ function Bonuses() {
             {`1. The exchange rate between Reward Points and MB is 1:${accountData?.bonus.bonus_to_mb_rate}
 2. Minimum redemption of ${accountData?.bonus?.min_redeem_bonus_amount } Reward Points.`}
             <p className='mt-10 text-gray-300'>*The gas fee will be deducted from the exchanged MB, so the actual amount of tokens received would be less than the estimated amount.</p>
+            <div className='flex justify-end mt-10 text-[#5d61ff] font-bold' onClick={addMB}>Add MB</div>
           </div>
         </div>
       </div>
