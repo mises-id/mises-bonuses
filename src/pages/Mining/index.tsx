@@ -131,7 +131,7 @@ function Mining() {
     await window.misesEthereum?.showAds?.()
     adsCallback()
    } catch (error: any) {
-    if(error.code === 1) {
+    if(error.code !== 0 ) {
       Toast.show(error.message)
     }
     setAdsLoadingFalse()
