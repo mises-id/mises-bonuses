@@ -45,6 +45,8 @@ export async function signin(auth: string): Promise<{
  * fetch bonus count for user account
  */
 export async function fetchBonusCount(): Promise<{"bonus": number}> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: '/v1/mining/bonus',
     headers: {
@@ -58,6 +60,8 @@ export async function fetchBonusCount(): Promise<{"bonus": number}> {
  * redeem bonus count
  */
 export async function redeemBonusCount(bonus: number): Promise<boolean> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: '/v1/mining/redeem_bonus',
     method: 'post',
@@ -82,6 +86,8 @@ export interface checkMBairdropData {
  * check mises account
  */
 export async function checkMisesAccount(misesid: string): Promise<checkMBairdropData> {
+  const token = getToken('mises-token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: `/v1/mb_airdrop/user/${misesid}`,
     headers: {
@@ -100,6 +106,8 @@ export interface paramsData {
  * claim $MB
  */
 export async function claimAirdrop(params: paramsData): Promise<void> {
+  const token = getToken('mises-token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: `/v1/mb_airdrop/claim`,
     params,
@@ -118,6 +126,8 @@ export async function fetchAdMiningData(): Promise<{
   "limit_per_day": number,
   "today_bonus_count": number
 }> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: `/v1/ad_mining/me`,
     headers: {
