@@ -260,19 +260,7 @@ function Mining() {
         </a>
       </>
     }
-    return <>
-      <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
-      <div style={{minHeight: 160}}>
-        <img src="./images/me-bg.png" alt="bg" width="100%" className="block"/>
-      </div>
-      <div className='bg-white px-15 pb-30'>
-        <p className='text-25 text-[#333333]'>About Mining</p>
-        <p className='text-14 leading-6 text-[#333333] py-20 mb-20'>Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.</p>
-        <Button block shape='rounded' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", 'padding': '12px 0' }}>
-          <span className='text-white block text-18'>{buttonText}</span>
-        </Button>
-      </div>
-    </>
+    return null;
   };
 
   const token = getToken();
@@ -280,6 +268,19 @@ function Mining() {
   return (
     <div className={`h-screen bg-white ${token ? 'bg-gradient-to-b' : ''}  from-[#ebe0f0] to-[#d0defb] flex flex-col`}>
       <RenderView />
+      {!token && <>
+        <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
+        <div style={{minHeight: 160}}>
+          <img src="./images/me-bg.png" alt="bg" width="100%" className="block"/>
+        </div>
+        <div className='bg-white px-15 pb-30'>
+          <p className='text-25 text-[#333333]'>About Mining</p>
+          <p className='text-14 leading-6 text-[#333333] py-20 mb-20'>Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.</p>
+          <Button block shape='rounded' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", 'padding': '12px 0' }}>
+            <span className='text-white block text-18'>{buttonText}</span>
+          </Button>
+        </div>
+      </>}
       <Popup
         position='bottom'
         showCloseButton
