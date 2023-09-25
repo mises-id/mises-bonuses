@@ -94,7 +94,7 @@ function Bonuses() {
 
   
   
-  const { data: formBalance, run, refresh } = useRequest(async () => {
+  const { data: formBalance, run, refresh, error } = useRequest(async () => {
     const token = getToken()
     if(!token) return '';
     try {
@@ -112,6 +112,15 @@ function Bonuses() {
     refreshDeps: [currentAccount],
     manual: true
   })
+
+  useEffect(() => {
+    const errorResponse = (error as any)?.response
+    if (error && errorResponse && errorResponse.status === 403 && errorResponse.data.code === 403002) {
+      localStorage.removeItem('ethAccount');
+      removeToken('token')
+    }
+    // eslint-disable-next-line
+  }, [error])
 
   const fetchMBBalance = () => {
     console.log("fetchMBBalance")
@@ -275,7 +284,7 @@ function Bonuses() {
     try {
       await connectWallet();
       await checkSign()
-      await checkChainId();
+      // await checkChainId();
       await swap()
     } catch (error: any) {
       setFalse()
@@ -377,7 +386,7 @@ function Bonuses() {
           </Button>
         </div>
       </div>
-      <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
+      <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]  animate__animated animate__fadeInUp'>
         <div className='flex flex-row '>
           {/* <div className='w-60 h-60 flex-none mt-5'>
             <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path d="M640 224c19.2 0 38.4 9.6 51.2 25.6l118.4 156.8c19.2 25.6 16 57.6-3.2 80l-246.4 275.2c-22.4 25.6-64 28.8-89.6 6.4-3.2 0-3.2-3.2-3.2-3.2l-249.6-275.2c-19.2-22.4-22.4-57.6-3.2-83.2l118.4-156.8c12.8-16 32-25.6 51.2-25.6h256z m0 64h-256l-118.4 156.8 246.4 275.2 246.4-275.2L640 288z m-32 96c19.2 0 32 12.8 32 32s-12.8 32-32 32h-192c-19.2 0-32-12.8-32-32s12.8-32 32-32h192z" fill="#5D61FF" data-spm-anchor-id="a313x.search_index.0.i0.72cd3a81Rm0qVB"></path></svg>

@@ -31,6 +31,7 @@ const errorHandler = (error: {
     return Promise.reject(error);
   }
   if (!response) {
+    console.log('No response from server.')
     Toast.show('Bad gateway error.');
     return Promise.reject(error);
   }

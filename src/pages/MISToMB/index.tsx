@@ -357,7 +357,7 @@ function MISToMB() {
           </Button>
         </div>
       </div>
-      <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
+      <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c] animate__animated animate__fadeInUp'>
         <div className='text-[16px] font-200 text-gray-500 leading-6 p-10 pre whitespace-pre-line'>
           {`1. The maximum redeemable quantity is based on the snapshot on Sept 7th.
 2. The exchange rate between MIS and MB is 1:1.
