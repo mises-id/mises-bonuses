@@ -340,7 +340,7 @@ function Mining() {
           </p>
           <div className='flex justify-center mt-20 gap-10'>
             <Button color='primary' shape='rounded' fill='outline' className='w-[100px]' onClick={()=>setcontinuePop(false)}>Cancel</Button>
-            <Button color='primary' shape='rounded' className='w-[100px]' onClick={fetchAds}>Continue</Button>
+            <Button color='primary' shape='rounded' className='w-[100px]' onClick={fetchAds} loading={adsLoading}>Continue</Button>
           </div>
         </div>
       </CenterPopup>
