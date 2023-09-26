@@ -1,8 +1,8 @@
-import { fetchAdMiningData, signin } from '@/api';
+import { fetchAdMiningData, reportAds, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDebounceFn, useDocumentVisibility, useRequest } from 'ahooks';
-import {Button, CenterPopup, Popup, Toast } from 'antd-mobile'
+import { Button, CenterPopup, Image, Popup, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
@@ -21,6 +21,7 @@ function Mining() {
   // const provider = useProvider()
   const [adsLoading, { setTrue: setAdsLoadingTrue, setFalse: setAdsLoadingFalse }] = useBoolean(false)
   const [showCenterPop, setshowCenterPop] = useState(false)
+  const [continuePop, setcontinuePop] = useState(false)
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
       return accounts[0]
@@ -28,8 +29,8 @@ function Mining() {
     const connectAddress = localStorage.getItem('ethAccount')
     return connectAddress || ''
   }, [accounts])
-  
-  
+
+
   // const [signLoading, { setTrue: setsignLoadingTrue, setFalse: setsignLoadingFalse }] = useBoolean(true)
 
   const signMsg = async () => {
@@ -78,6 +79,7 @@ function Mining() {
           setshowDialog(false)
         })
       }).catch(error => {
+        console.log(error, 'error')
         Toast.show(error.message)
       })
     }
@@ -99,7 +101,7 @@ function Mining() {
     //   console.log(accounts, 'accounts')
     // }
     console.log(`Current document visibility state: ${documentVisibility}`);
-    if(documentVisibility === 'visible') {
+    if (documentVisibility === 'visible') {
       loginMises()
     }
     console.log(accounts)
@@ -112,7 +114,10 @@ function Mining() {
       await connector.activate()
       loginMises()
     } catch (error: any) {
-      Toast.show(error.message)
+      console.log(error)
+      if (error && error.code !== -32603) {
+        Toast.show(error.message)
+      }
     }
   }
 
@@ -121,6 +126,10 @@ function Mining() {
     refresh()
     cancelCenterLoadingPop()
     setshowCenterPop(false)
+    setcontinuePop(true)
+    reportAds({
+      ad_type: 'admob'
+    })
   }
 
   const { run: showCenterLoadingPop, cancel: cancelCenterLoadingPop } = useDebounceFn(
@@ -133,7 +142,7 @@ function Mining() {
   );
 
   // const showAds = () => {
-  //   return new Promise<void>((resolve) =>{
+  //   return new Promise<void>((resolve) => {
   //     setTimeout(() => {
   //       resolve()
   //     }, 5000);
@@ -146,20 +155,20 @@ function Mining() {
       setshowDialog(true)
       return
     }
-   try {
-    setAdsLoadingTrue()
-    showCenterLoadingPop()
-    // await showAds()
-    await window.misesEthereum?.showAds?.()
-    adsCallback()
-   } catch (error: any) {
-    if(error.code !== 0 ) {
-      Toast.show(error.message)
+    try {
+      setAdsLoadingTrue()
+      showCenterLoadingPop()
+      // await showAds()
+      await window.misesEthereum?.showAds?.()
+      adsCallback()
+    } catch (error: any) {
+      if (error.code !== 0) {
+        Toast.show(error.message)
+      }
+      setAdsLoadingFalse()
+      cancelCenterLoadingPop()
+      setshowCenterPop(false)
     }
-    setAdsLoadingFalse()
-    cancelCenterLoadingPop()
-    setshowCenterPop(false)
-   }
   }
 
   const { accountData } = usePageValue()
@@ -182,13 +191,13 @@ function Mining() {
     if (error && errorResponse && errorResponse.status === 403 && errorResponse.data.code === 403002) {
       localStorage.removeItem('ethAccount');
       removeToken('token')
-      
+
     }
     // eslint-disable-next-line
   }, [error])
 
   const buttonText = useMemo(() => {
-    if(isActivating) {
+    if (isActivating) {
       return 'Connect Wallet...'
     }
 
@@ -199,7 +208,7 @@ function Mining() {
 
   const RenderView = () => {
     const token = getToken();
-    if(token) {
+    if (token) {
       // 
       return <>
         <div className='px-15'>
@@ -210,7 +219,7 @@ function Mining() {
           <div className='mt-20'>
             <p className='text-20 leading-8 text-[#5d61ff] font-bold tracking-wider bg-gradient-to-b from-[#CE9FFC] to-[#5d61ff] text-transparent bg-clip-text'>
               Upon successfully finishing the assigned tasks, you will be rewarded with mises reward points,
-            which can later be converted into MB.
+              which can later be converted into MB.
             </p>
           </div>
         </div>
@@ -254,8 +263,8 @@ function Mining() {
             </div>
           </div>
         </div>
-        <a href="https://mining.test.mises.site/bonuses" target='_blank' rel="noreferrer" 
-        className='text-16 fixed bottom-20 left-1/2 -translate-x-1/2' style={{textDecoration: 'none'}}>
+        <a href="https://mining.test.mises.site/bonuses" target='_blank' rel="noreferrer"
+          className='text-16 fixed bottom-20 left-1/2 -translate-x-1/2' style={{ textDecoration: 'none' }}>
           Link to redeem
         </a>
       </>
@@ -270,8 +279,8 @@ function Mining() {
       <RenderView />
       {!token && <>
         <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
-        <div style={{minHeight: 160}}>
-          <img src="./images/me-bg.png" alt="bg" width="100%" className="block"/>
+        <div style={{ minHeight: 160 }}>
+          <img src="./images/me-bg.png" alt="bg" width="100%" className="block" />
         </div>
         <div className='bg-white px-15 pb-30'>
           <p className='text-25 text-[#333333]'>About Mining</p>
@@ -304,17 +313,35 @@ function Mining() {
         </div>
       </Popup>
       <CenterPopup
-       style={{'--min-width': '90vw'}}
+        style={{ '--min-width': '90vw' }}
         visible={showCenterPop}>
-        <div className='py-30 px-20'>
+        <div className='py-30 px-10'>
           <div className='loading-icon'>
-            <svg width="94" height="94" viewBox="0 0 94 94"  fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M92 47C92 22.1472 71.8528 2 47 2C22.1472 2 2 22.1472 2 47C2 71.8528 22.1472 92 47 92" stroke="#2172E5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="94" height="94" viewBox="0 0 94 94" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M92 47C92 22.1472 71.8528 2 47 2C22.1472 2 2 22.1472 2 47C2 71.8528 22.1472 92 47 92" stroke="#2172E5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <p className='text-20 text-gray-800 text-center mt-40'>
-            Please wait to request ads
+            Please wait for request ads
           </p>
+        </div>
+      </CenterPopup>
+      <CenterPopup
+        showCloseButton
+        onClose={() => setcontinuePop(false)}
+        style={{ '--min-width': '90vw' }}
+        visible={continuePop}>
+        <div className='py-30 px-10'>
+          <div className='flex justify-center'>
+            <Image width={80} src='./images/successful.png' fallback="" />
+          </div>
+          <p className='text-16 text-gray-600 text-center mt-20 leading-6'>
+            {adMiningData?.today_bonus_count !== adMiningData?.limit_per_day ? 'Watch another for more rewards points.' : 'View limit reached; further viewing won\'t earn points.'}
+          </p>
+          <div className='flex justify-center mt-20 gap-10'>
+            <Button color='primary' shape='rounded' fill='outline' className='w-[100px]' onClick={()=>setcontinuePop(false)}>Cancel</Button>
+            <Button color='primary' shape='rounded' className='w-[100px]' onClick={fetchAds}>Continue</Button>
+          </div>
         </div>
       </CenterPopup>
     </div>

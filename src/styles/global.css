@@ -224,6 +224,10 @@
   width: 200px;
 }
 
+.w-\[100px\] {
+  width: 100px;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -485,6 +489,10 @@
   font-size: 14px;
 }
 
+.text-13 {
+  font-size: 13px;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -561,10 +569,6 @@
 .text-gray-800 {
   --tw-text-opacity: 1;
   color: rgb(31 41 55 / var(--tw-text-opacity));
-}
-
-.underline-offset-0 {
-  text-underline-offset: 0px;
 }
 
 .outline {

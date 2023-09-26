@@ -77,15 +77,15 @@ function Bonuses() {
         })
       }
     }
-    if(!currentAccount) {
-      setformValue('')
-      settoValue('')
-      removeToken('token')
-      settoBalance('')
-      refresh()
-      localStorage.removeItem('ethAccount')
-      setLoginFalse()
-    }
+    // if(!currentAccount) {
+    //   setformValue('')
+    //   settoValue('')
+    //   removeToken('token')
+    //   settoBalance('')
+    //   refresh()
+    //   localStorage.removeItem('ethAccount')
+    //   setLoginFalse()
+    // }
 
     console.log(currentAccount, "currentAccount")
     // eslint-disable-next-line
@@ -184,7 +184,7 @@ function Bonuses() {
         await connector.activate()
       }
       return Promise.resolve()
-    } catch (error) {
+    } catch (error: any) {
       return Promise.reject(error)
     }
   }
@@ -288,7 +288,9 @@ function Bonuses() {
       await swap()
     } catch (error: any) {
       setFalse()
-      Toast.show(error.message)
+      if(error && error.code !== -32603) {
+        Toast.show(error.message)
+      }
     }
   }
 

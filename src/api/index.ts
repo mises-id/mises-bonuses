@@ -136,4 +136,22 @@ export async function fetchAdMiningData(): Promise<{
   })
   return data
 }
+/**
+ * fetch data for me
+ */
+export async function reportAds(requestData: {
+  ad_type: 'admob'
+}): Promise<void> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
+  const { data } = await request({
+    url: `/v1/ad_mining/log`,
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
+    },
+    data: requestData
+  })
+  return data
+}
 
