@@ -115,7 +115,7 @@ function Mining() {
       loginMises()
     } catch (error: any) {
       console.log(error)
-      if (error && error.code !== -32603) {
+      if(error && error.code !== 1) {
         Toast.show(error.message)
       }
     }

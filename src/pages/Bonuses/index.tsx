@@ -288,7 +288,7 @@ function Bonuses() {
       await swap()
     } catch (error: any) {
       setFalse()
-      if(error && error.code !== -32603) {
+      if(error && error.code !== 1) {
         Toast.show(error.message)
       }
     }
