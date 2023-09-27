@@ -1,0 +1,13 @@
+diff --git a/node_modules/@web3-react/metamask/dist/index.js b/node_modules/@web3-react/metamask/dist/index.js
+index c8476dd..1bbf826 100644
+--- a/node_modules/@web3-react/metamask/dist/index.js
++++ b/node_modules/@web3-react/metamask/dist/index.js
+@@ -36,7 +36,7 @@ exports.MetaMask = exports.NoMetaMaskError = void 0;
+ const types_1 = require("@web3-react/types");
+ class NoMetaMaskError extends Error {
+     constructor() {
+-        super('MetaMask not installed');
++        super('Please download the latest version of Mises Browser.');
+         this.name = NoMetaMaskError.name;
+         Object.setPrototypeOf(this, NoMetaMaskError.prototype);
+     }

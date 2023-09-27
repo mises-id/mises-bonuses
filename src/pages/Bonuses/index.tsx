@@ -24,6 +24,7 @@ function Bonuses() {
   const [toValue, settoValue] = useState<string | undefined>('')
 
   const accountRef = useRef<string>('')
+  const [authAccount, setauthAccount] = useState('')
 
   // const [formBalance, setformBalance] = useState<string | undefined>('')
   const [toBalance, settoBalance] = useState<string | undefined>('')
@@ -42,8 +43,8 @@ function Bonuses() {
       accountRef.current = accounts[0]
       return accounts[0]
     }
-    return ''
-  }, [accounts])
+    return authAccount || ''
+  }, [accounts, authAccount])
 
   useEffect(() => {
     const token = getToken()
@@ -56,6 +57,22 @@ function Bonuses() {
 
   const documentVisibility = useDocumentVisibility();
 
+  const loginMisesAccount = async (params: {
+    auth: string,
+    misesId: string
+  }) => {
+    try {
+      const res = await signin(params.auth)
+      setToken('token', res.token);
+      setauthAccount(params.misesId)
+      localStorage.setItem('ethAccount', params.misesId)
+      refresh()
+      setLoginTrue()
+    } catch (error) {
+      
+    }
+  }
+
   useEffect(() => {
     console.log(`Current document visibility state: ${documentVisibility}`);
     if(documentVisibility === 'visible') {
@@ -67,25 +84,25 @@ function Bonuses() {
         setLoginFalse()
         removeToken('token')
         signMsg().then(auth => {
-          signin(auth).then(res=> {
-            setToken('token', res.token);
-            localStorage.setItem('ethAccount', currentAccount)
-            refresh()
-            setLoginTrue()
-          }).catch(() => {
+          loginMisesAccount({
+            auth,
+            misesId: currentAccount
           })
         })
       }
     }
-    // if(!currentAccount) {
-    //   setformValue('')
-    //   settoValue('')
-    //   removeToken('token')
-    //   settoBalance('')
-    //   refresh()
-    //   localStorage.removeItem('ethAccount')
-    //   setLoginFalse()
-    // }
+
+    if(!currentAccount) {
+      window.misesEthereum?.getCachedAuth?.().then(res => {
+        console.log('getCachedAuth')
+        const token = getToken()
+        !token && loginMisesAccount(res)
+      }).catch(err => {
+        console.log(err, 'getCachedAuth:error')
+        removeToken('token')
+        localStorage.removeItem('ethAccount')
+      })
+    }
 
     console.log(currentAccount, "currentAccount")
     // eslint-disable-next-line
@@ -133,6 +150,7 @@ function Bonuses() {
   }
 
   useEffect(() => {
+    console.log(currentAccount, 'currentAccount')
     if(currentAccount) {
       fetchMBBalance()
     }

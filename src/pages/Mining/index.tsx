@@ -1,18 +1,19 @@
 import { fetchAdMiningData, reportAds, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
-import { useBoolean, useDebounceFn, useDocumentVisibility, useRequest } from 'ahooks';
-import { Button, CenterPopup, Image, Popup, Toast } from 'antd-mobile'
+import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
+import { Button, CenterPopup, Image, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
 import './index.less';
+import { logEvent } from 'firebase/analytics';
 
 const { useAccounts, useIsActivating } = hooks
 
 function Mining() {
-  const [showDialog, setshowDialog] = useState(false)
   const accounts = useAccounts()
   const isActivating = useIsActivating()
   const { connector } = useWeb3React();
@@ -22,13 +23,14 @@ function Mining() {
   const [adsLoading, { setTrue: setAdsLoadingTrue, setFalse: setAdsLoadingFalse }] = useBoolean(false)
   const [showCenterPop, setshowCenterPop] = useState(false)
   const [continuePop, setcontinuePop] = useState(false)
+  const [authAccount, setauthAccount] = useState('')
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
       return accounts[0]
     }
     const connectAddress = localStorage.getItem('ethAccount')
-    return connectAddress || ''
-  }, [accounts])
+    return connectAddress || authAccount || ''
+  }, [accounts, authAccount])
 
 
   // const [signLoading, { setTrue: setsignLoadingTrue, setFalse: setsignLoadingFalse }] = useBoolean(true)
@@ -66,17 +68,30 @@ function Mining() {
     }
   }
 
+  const loginMisesAccount = async (params: {
+    auth: string,
+    misesId: string
+  }) => {
+    try {
+      const res = await signin(params.auth)
+      setToken('token', res.token)
+      localStorage.setItem('ethAccount', params.misesId)
+      setauthAccount(params.misesId)
+      refresh()
+    } catch (error) {
+      
+    }
+  }
+
   const loginMises = () => {
     const oldConnectAddress = localStorage.getItem('ethAccount')
     if (accounts && accounts.length && oldConnectAddress !== accounts[0]) {
-      removeToken('token')
-      localStorage.removeItem('ethAccount')
+      // removeToken('token')
+      // localStorage.removeItem('ethAccount')
       signMsg().then(auth => {
-        signin(auth).then(res => {
-          setToken('token', res.token)
-          localStorage.setItem('ethAccount', accounts[0])
-          refresh()
-          setshowDialog(false)
+        loginMisesAccount({
+          auth,
+          misesId: accounts[0]
         })
       }).catch(error => {
         console.log(error, 'error')
@@ -95,14 +110,20 @@ function Mining() {
   const documentVisibility = useDocumentVisibility();
 
   useEffect(() => {
-    // if(!currentAccount) {
-    //   localStorage.removeItem('ethAccount')
-    //   removeToken()
-    //   console.log(accounts, 'accounts')
-    // }
     console.log(`Current document visibility state: ${documentVisibility}`);
     if (documentVisibility === 'visible') {
       loginMises()
+    }
+    if(!accounts) {
+      window.misesEthereum?.getCachedAuth?.().then(res => {
+        console.log('getCachedAuth')
+        const token = getToken()
+        !token && loginMisesAccount(res)
+      }).catch(err => {
+        console.log(err, 'getCachedAuth:error')
+        removeToken('token')
+        localStorage.removeItem('ethAccount')
+      })
     }
     console.log(accounts)
     // eslint-disable-next-line
@@ -124,22 +145,13 @@ function Mining() {
   const adsCallback = () => {
     setAdsLoadingFalse()
     refresh()
-    cancelCenterLoadingPop()
     setshowCenterPop(false)
     setcontinuePop(true)
+    logEvent(analytics, 'watched_ads_success')
     reportAds({
       ad_type: 'admob'
     })
   }
-
-  const { run: showCenterLoadingPop, cancel: cancelCenterLoadingPop } = useDebounceFn(
-    () => {
-      setshowCenterPop(true)
-    },
-    {
-      wait: 2000,
-    },
-  );
 
   // const showAds = () => {
   //   return new Promise<void>((resolve) => {
@@ -149,15 +161,15 @@ function Mining() {
   //   })
   // }
 
+  const analytics = useAnalytics()
+
   const fetchAds = async () => {
     const token = getToken()
-    if (!token) {
-      setshowDialog(true)
-      return
-    }
+    if (!token) return
+
     try {
       setAdsLoadingTrue()
-      showCenterLoadingPop()
+      setshowCenterPop(true)
       // await showAds()
       await window.misesEthereum?.showAds?.()
       adsCallback()
@@ -166,8 +178,8 @@ function Mining() {
         Toast.show(error.message)
       }
       setAdsLoadingFalse()
-      cancelCenterLoadingPop()
       setshowCenterPop(false)
+      logEvent(analytics, 'watched_ads_failed')
     }
   }
 
@@ -204,6 +216,7 @@ function Mining() {
     return 'Connect Mises ID'
     //
   }, [isActivating])
+  
 
 
   const RenderView = () => {
@@ -290,30 +303,13 @@ function Mining() {
           </Button>
         </div>
       </>}
-      <Popup
-        position='bottom'
-        showCloseButton
-        bodyClassName="rounded-t-10"
-        onMaskClick={() => {
-          setshowDialog(false)
-        }}
-        visible={showDialog}
-        onClose={() => {
-          setshowDialog(false)
-        }}>
-        <div className='py-30 px-20'>
-          <p className='text-16 leading-[24px] text-gray-500'>
-            Mises ID is a decentralized personal account.You need your own Mises ID to use Mises Mining.
-          </p>
-          <div className='flex justify-center items-center mt-40'>
-            <Button className='w-[200px]' onClick={connectWallet} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-              <span className='text-white'>{buttonText}</span>
-            </Button>
-          </div>
-        </div>
-      </Popup>
       <CenterPopup
         style={{ '--min-width': '90vw' }}
+        showCloseButton
+        onClose={() => {
+          setshowCenterPop(false);
+          setAdsLoadingFalse()
+        }}
         visible={showCenterPop}>
         <div className='py-30 px-10'>
           <div className='loading-icon'>
@@ -340,7 +336,10 @@ function Mining() {
           </p>
           <div className='flex justify-center mt-20 gap-10'>
             <Button color='primary' shape='rounded' fill='outline' className='w-[100px]' onClick={()=>setcontinuePop(false)}>Cancel</Button>
-            <Button color='primary' shape='rounded' className='w-[100px]' onClick={fetchAds} loading={adsLoading}>Continue</Button>
+            <Button color='primary' shape='rounded' className='w-[100px]' onClick={() => {
+              fetchAds()
+              setcontinuePop(false)
+            }} loading={adsLoading}>Continue</Button>
           </div>
         </div>
       </CenterPopup>

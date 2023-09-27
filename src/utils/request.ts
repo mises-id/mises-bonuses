@@ -22,7 +22,7 @@ const errorHandler = (error: {
   response: AxiosResponse;
   config: AxiosRequestConfig;
 }) => {
-  const { response, config } = error;
+  const { response } = error;
   if (response && response.status) {
     const errorText =
       response?.data.message || codeMessage[response.status] || response.statusText;
@@ -30,14 +30,16 @@ const errorHandler = (error: {
     Toast.show(errorText);
     return Promise.reject(error);
   }
+
   if (!response) {
     console.log('No response from server.')
     Toast.show('Bad gateway error.');
     return Promise.reject(error);
   }
-  if (config) {
-    Toast.show('Unknown error');
-  }
+
+  // if (config) {
+  //   Toast.show('Unknown error');
+  // }
   // return response;
   return Promise.reject(error);
 };
