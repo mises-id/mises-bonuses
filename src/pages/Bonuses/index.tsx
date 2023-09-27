@@ -9,6 +9,7 @@ import { fetchBonusCount, redeemBonusCount, signin } from '@/api'
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks'
 import { usePageValue } from '@/components/pageProvider'
 import BigNumber from 'bignumber.js'
+import DownloadPop from '@/components/DownloadPop'
 const { useChainId, useAccounts, useIsActivating, useProvider } = hooks
 
 function Bonuses() {
@@ -17,6 +18,8 @@ function Bonuses() {
   const [login, {setTrue: setLoginTrue, setFalse: setLoginFalse}] = useBoolean(false)
 
   const [loading, {setTrue, setFalse}] = useBoolean(false)
+
+  const [downloadPop, setDownloadPop] = useState(false)
 
   const [errorTxt, seterrorTxt] = useState('')
 
@@ -306,6 +309,11 @@ function Bonuses() {
       await swap()
     } catch (error: any) {
       setFalse()
+
+      if(error && error.message === 'Please download the latest version of Mises Browser.') {
+        setDownloadPop(true)
+        return
+      }
       if(error && error.code !== 1) {
         Toast.show(error.message)
       }
@@ -441,6 +449,8 @@ function Bonuses() {
           </div>
         </div>
       </Popup>
+
+      <DownloadPop setDownloadPop={setDownloadPop} downloadPop={downloadPop} />
     </div>
   )
 }

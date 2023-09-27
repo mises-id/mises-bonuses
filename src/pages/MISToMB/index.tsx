@@ -13,6 +13,7 @@ import { useLCDClient } from '@/hooks/uselcdClient'
 import BigNumber from 'bignumber.js'
 import { claimAirdrop } from '@/api'
 import { usePageValue } from '@/components/pageProvider'
+import DownloadPop from '@/components/DownloadPop'
 const { useAccounts, useIsActivating, useIsActive } = hooks
 
 function MISToMB() {
@@ -26,6 +27,8 @@ function MISToMB() {
 
   const [toBalance, settoBalance] = useState<string | undefined>('')
   const [errorTxt, seterrorTxt] = useState('')
+
+  const [downloadPop, setDownloadPop] = useState(false)
 
 
   const { connector } = useWeb3React();
@@ -161,20 +164,20 @@ function MISToMB() {
     if (isActivating) {
       return 'Connecting wallet...'
     }
-    if(misesWalletIsActivating) {
-      return 'Connecting Mises wallet...'
-    }
+    // if(misesWalletIsActivating) {
+    //   return 'Connecting Mises wallet...'
+    // }
     
     if(errorTxt) {
       return errorTxt
     }
 
     return stepStatusText
-  }, [isActivating, stepStatusText, misesWalletIsActivating, errorTxt])
+  }, [isActivating, stepStatusText, errorTxt])
 
   // button status 
   const buttonDisabled = useMemo(() => {
-    if (isActivating || misesWalletIsActivating || errorTxt) {
+    if (isActivating || errorTxt) {
       return true;
     }
 
@@ -183,7 +186,7 @@ function MISToMB() {
     }
 
     return false;
-  }, [isActivating, misesWalletIsActivating, errorTxt, formValue, toValue, misesAccount, accounts])
+  }, [isActivating, errorTxt, formValue, toValue, misesAccount, accounts])
 
   const connectWallet = async () => {
     try {
@@ -234,6 +237,10 @@ function MISToMB() {
       setshowSubmitDialog(true)
       
     } catch (error: any) {
+      if(error && error.message === 'Please download the latest version of Mises Browser.') {
+        setDownloadPop(true)
+        return
+      }
       setFalse()
       if(error.message) {
         Toast.show(error.message)
@@ -412,6 +419,7 @@ function MISToMB() {
           </div>
         </div>
       </Popup>
+      <DownloadPop setDownloadPop={setDownloadPop} downloadPop={downloadPop} />
     </div>
   )
 }

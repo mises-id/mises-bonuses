@@ -85,6 +85,10 @@
   position: fixed;
 }
 
+.absolute {
+  position: absolute;
+}
+
 .relative {
   position: relative;
 }
@@ -104,6 +108,50 @@
 
 .top-0 {
   top: 0px;
+}
+
+.bottom-0 {
+  bottom: 0px;
+}
+
+.top-80 {
+  top: 80px;
+}
+
+.top-60 {
+  top: 60px;
+}
+
+.left-30 {
+  left: 30px;
+}
+
+.left-20 {
+  left: 20px;
+}
+
+.left-23 {
+  left: 23px;
+}
+
+.left-26 {
+  left: 26px;
+}
+
+.left-24 {
+  left: 24px;
+}
+
+.top-55 {
+  top: 55px;
+}
+
+.top-53 {
+  top: 53px;
+}
+
+.left-25 {
+  left: 25px;
 }
 
 .z-10 {
@@ -176,6 +224,10 @@
   margin-bottom: 20px;
 }
 
+.mt-30 {
+  margin-top: 30px;
+}
+
 .block {
   display: block;
 }
@@ -220,12 +272,8 @@
   width: 40%;
 }
 
-.w-\[200px\] {
-  width: 200px;
-}
-
-.w-\[100px\] {
-  width: 100px;
+.w-\[120px\] {
+  width: 120px;
 }
 
 .flex-1 {
@@ -300,6 +348,10 @@
 
 .rounded {
   border-radius: 0.25rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
 }
 
 .border-4 {
@@ -489,10 +541,6 @@
   font-size: 14px;
 }
 
-.text-13 {
-  font-size: 13px;
-}
-
 .font-bold {
   font-weight: 700;
 }
@@ -629,6 +677,10 @@ body{
 
 div{
   line-height:1
+}
+
+.app{
+  background-image: linear-gradient(to bottom, #EEEFFF, #f7f7f7)
 }
 
 .nav-bg.adm-nav-bar{

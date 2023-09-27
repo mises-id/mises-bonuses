@@ -101,7 +101,7 @@ export function useMisesWallet() {
       } else {
         return Promise.reject({
           code: 9999,
-          message: 'Not found Mises Provider'
+          message: 'Please download Mises Browser'
         })
       }
     } catch (error) {

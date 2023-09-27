@@ -10,6 +10,7 @@ import { hooks, metaMask } from '@/components/Web3Provider/metamask'
 import { useWeb3React } from '@web3-react/core';
 import './index.less';
 import { logEvent } from 'firebase/analytics';
+import DownloadPop from '@/components/DownloadPop';
 
 const { useAccounts, useIsActivating } = hooks
 
@@ -23,6 +24,7 @@ function Mining() {
   const [adsLoading, { setTrue: setAdsLoadingTrue, setFalse: setAdsLoadingFalse }] = useBoolean(false)
   const [showCenterPop, setshowCenterPop] = useState(false)
   const [continuePop, setcontinuePop] = useState(false)
+  const [downloadPop, setDownloadPop] = useState(false)
   const [authAccount, setauthAccount] = useState('')
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
@@ -135,7 +137,10 @@ function Mining() {
       await connector.activate()
       loginMises()
     } catch (error: any) {
-      console.log(error)
+      if(error && error.message === 'Please download the latest version of Mises Browser.') {
+        setDownloadPop(true)
+        return
+      }
       if(error && error.code !== 1) {
         Toast.show(error.message)
       }
@@ -335,14 +340,15 @@ function Mining() {
             {adMiningData?.today_bonus_count !== adMiningData?.limit_per_day ? 'Watch another for more rewards points.' : 'View limit reached; further viewing won\'t earn points.'}
           </p>
           <div className='flex justify-center mt-20 gap-10'>
-            <Button color='primary' shape='rounded' fill='outline' className='w-[100px]' onClick={()=>setcontinuePop(false)}>Cancel</Button>
-            <Button color='primary' shape='rounded' className='w-[100px]' onClick={() => {
+            <Button color='primary' shape='rounded' fill='outline' className='flex-1' onClick={()=>setcontinuePop(false)}>Cancel</Button>
+            <Button color='primary' shape='rounded' className='flex-1' onClick={() => {
               fetchAds()
               setcontinuePop(false)
             }} loading={adsLoading}>Continue</Button>
           </div>
         </div>
       </CenterPopup>
+      <DownloadPop setDownloadPop={setDownloadPop} downloadPop={downloadPop} />
     </div>
   )
 }
