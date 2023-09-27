@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './index.less'
 import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, MisInfo, formatAmount, getErc20Balance } from '@/utils'
+import { MBCoinInfo, MisInfo, formatAmount, getErc20Balance, removeToken } from '@/utils'
 import { useMisesWallet } from '@/hooks/useMisesWallet'
 import { getAmount } from '@/hooks/useInitialBankBalance'
 import { useBoolean, useRequest } from 'ahooks'
@@ -13,10 +13,12 @@ import { useLCDClient } from '@/hooks/uselcdClient'
 import BigNumber from 'bignumber.js'
 import { claimAirdrop } from '@/api'
 import { usePageValue } from '@/components/pageProvider'
-const { useChainId, useAccounts, useIsActivating, useIsActive } = hooks
+import DownloadPop from '@/components/DownloadPop'
+const { useAccounts, useIsActivating, useIsActive } = hooks
 
 function MISToMB() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
+  const [showSubmitDialog, setshowSubmitDialog] = useState(false)
 
   const [loading, {setTrue, setFalse}] = useBoolean(false)
 
@@ -26,15 +28,20 @@ function MISToMB() {
   const [toBalance, settoBalance] = useState<string | undefined>('')
   const [errorTxt, seterrorTxt] = useState('')
 
+  const [downloadPop, setDownloadPop] = useState(false)
+
 
   const { connector } = useWeb3React();
 
   const { activate: misesProviderActivate, isActivating: misesWalletIsActivating, account: misesAccount, checkAccountData, misesAccountData, sendMisTx, refreshLimit } = useMisesWallet();
-  const chainId = useChainId()
+  // const chainId = useChainId()
   const accounts = useAccounts()
+  
   const isActivating = useIsActivating()
 
   const isActive = useIsActive()
+
+  const { accountData } = usePageValue()
 
   // const provider = useProvider()
   // const ENSNames = useENSNames(provider)
@@ -57,14 +64,46 @@ function MISToMB() {
    return formatAmount(getAmount(misBalance!, "umis"), 6)
    // eslint-disable-next-line
   }, [misBalance])
+
+  const initFormData = () => {
+    formValueChange('');
+
+    if(Number(balance) > 0) {
+      // min exchange
+      if(accountData?.mb_airdrop?.min_redeem_mis_amount && balance) {
+        const compared = BigNumber(balance).comparedTo(accountData?.mb_airdrop?.min_redeem_mis_amount)
+        if(compared === -1) {
+          seterrorTxt('Insufficient balance')
+          return
+        }
+      }
+      if(checkAccountData?.current_airdrop_limit === 0) {
+        seterrorTxt('No redemption limit left')
+      }
+      if(checkAccountData?.current_airdrop_limit) {
+        const limit = formatAmount(`${checkAccountData.current_airdrop_limit}`, 6)
+        const value = BigNumber.min(limit, balance)
+        const compared = BigNumber(balance).comparedTo(checkAccountData.current_airdrop_limit)
+        if(compared === -1) {
+          formValueChange(value.minus(0.003).toString())
+        }else {
+          formValueChange(value.toString())
+        }
+      }
+    }
+  }
+  useEffect(() => {
+    initFormData()
+    // eslint-disable-next-line
+  }, [balance, checkAccountData?.current_airdrop_limit, accountData?.mb_airdrop?.min_redeem_mis_amount])
   
-  const setClaimReceiveAddress = async () => {
+  const claimReceiveAddress = async (tx_hash?: string) => {
     if(misesAccount && accounts?.length && misesAccountData?.pubkey) {
       try {
-        await claimAirdrop({receive_address: accounts[0]})
+        await claimAirdrop({receive_address: accounts[0], tx_hash: tx_hash})
       } catch (error: any) {
         if(error.response && error.response.status === 403 && error.response.data.code === 403002) {
-          localStorage.removeItem('token');
+          removeToken('mises-token')
           misesProviderActivate()
         }
         return Promise.reject(error)
@@ -72,12 +111,20 @@ function MISToMB() {
     }
   }
 
+  const { run: setClaimReceiveAddress } = useRequest(claimReceiveAddress, {
+    manual: true,
+    retryCount: 3
+  })
+
   useEffect(() => {
     if(accounts && accounts.length) {
       getErc20Balance(accounts[0]).then(res => {
-        settoBalance(`${res?.formatted || 0}`)
+        if(res?.formatted) {
+          const balance = BigNumber(res?.formatted).decimalPlaces(6, BigNumber.ROUND_DOWN).toString()
+          settoBalance(balance)
+        }
       })
-      setClaimReceiveAddress()
+      // setClaimReceiveAddress()
     }
     // eslint-disable-next-line
   }, [accounts])
@@ -117,20 +164,20 @@ function MISToMB() {
     if (isActivating) {
       return 'Connecting wallet...'
     }
-    if(misesWalletIsActivating) {
-      return 'Connecting Mises wallet...'
-    }
+    // if(misesWalletIsActivating) {
+    //   return 'Connecting Mises wallet...'
+    // }
     
     if(errorTxt) {
       return errorTxt
     }
 
     return stepStatusText
-  }, [isActivating, stepStatusText, misesWalletIsActivating, errorTxt])
+  }, [isActivating, stepStatusText, errorTxt])
 
   // button status 
   const buttonDisabled = useMemo(() => {
-    if (isActivating || misesWalletIsActivating || errorTxt) {
+    if (isActivating || errorTxt) {
       return true;
     }
 
@@ -139,7 +186,7 @@ function MISToMB() {
     }
 
     return false;
-  }, [isActivating, misesWalletIsActivating, errorTxt, formValue, toValue, misesAccount, accounts])
+  }, [isActivating, errorTxt, formValue, toValue, misesAccount, accounts])
 
   const connectWallet = async () => {
     try {
@@ -152,23 +199,6 @@ function MISToMB() {
     }
   }
 
-  const checkChainId = useCallback(
-    async () => {
-      try {
-        if (chainId !== MBChainId) {
-          return await connector.activate(MBChainId)
-        }
-        return Promise.resolve()
-      } catch (error: any) {
-        if (error.code === ErrorCode.addChain) {
-          return connector.activate(MBChainInfo)
-        }
-        return Promise.reject(error)
-      }
-    },
-    [connector, chainId],
-  )
-
   const checkUserAddress = async () => {
     console.log(accounts)
     if (accounts && accounts.length) {
@@ -180,13 +210,14 @@ function MISToMB() {
     })
   }
 
-  const resetData = () => {
+  const resetData = async () => {
     setformValue('')
     settoValue('')
     setshowConfirmDialog(true)
     setFalse()
-    refreshMis()
-    refreshLimit()
+    await refreshMis()
+    await refreshLimit()
+    initFormData()
   }
 
   const buttonClick = async () => {
@@ -199,23 +230,17 @@ function MISToMB() {
       // connect eth wallet
       if(stepStatus === 2) {
         await connectWallet();
-        await checkChainId();
         return;
       }
 
       // redeem token
-      setTrue();
-      if(stepStatus === 3) {
-        await checkUserAddress()
-        await setClaimReceiveAddress()
-        if(formValue) {
-          const aaa = await sendMisTx(formValue)
-          console.log(aaa)
-        }
-        resetData()
-      }
+      setshowSubmitDialog(true)
       
     } catch (error: any) {
+      if(error && error.message === 'Please download the latest version of Mises Browser.') {
+        setDownloadPop(true)
+        return
+      }
       setFalse()
       if(error.message) {
         Toast.show(error.message)
@@ -231,12 +256,32 @@ function MISToMB() {
     })
   }, [])
 
-  const addMB = () => {
-    connector.watchAsset?.(MBCoinInfo)
+  const closeConfirm = async () => {
     setshowConfirmDialog(false)
   }
 
-  const { accountData } = usePageValue()
+
+  const redeemSubmit = async () => {
+    try {
+      setTrue();
+      if(stepStatus === 3) {
+        await checkUserAddress()
+        setshowSubmitDialog(false)
+        if(formValue && accounts) {
+          const txData = await sendMisTx(formValue, accounts[0])
+          await setClaimReceiveAddress(txData.transactionHash)
+        }
+        resetData()
+      }
+    } catch (error: any) {
+      setFalse();
+      setshowSubmitDialog(false)
+      if(error.message) {
+        Toast.show(error.message)
+      }
+    }
+  }
+
 
   const replaceValue = (val: string, decimals: number = 18) => {
     const valueRegex = new RegExp( `^\\d*[.]?\\d{0,${decimals}}`,'g')
@@ -254,8 +299,7 @@ function MISToMB() {
     }
 
     if(accountData?.mb_airdrop?.min_redeem_mis_amount && value) {
-      const limit = formatAmount(`${accountData?.mb_airdrop?.min_redeem_mis_amount}`, 6)
-      const compared = BigNumber(value).comparedTo(limit)
+      const compared = BigNumber(value).comparedTo(accountData?.mb_airdrop?.min_redeem_mis_amount)
       if(compared === -1) {
         seterrorTxt(`Minimum redeem ${accountData?.mb_airdrop?.min_redeem_mis_amount} MIS`)
         return
@@ -274,24 +318,25 @@ function MISToMB() {
   }
 
   const Extra = () => {
-    if(checkAccountData?.current_airdrop_limit) {
-      const limit = formatAmount(`${checkAccountData?.current_airdrop_limit || 0}`, 6)
-      return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
-    }
-    return null;
+    // const token = getToken()
+    if(!misesAccount) { return null }
+    const limit = formatAmount(`${checkAccountData?.current_airdrop_limit || 0}`, 6)
+    return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
   }
+
   return (
     <div>
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
       <div className='container bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px]'>
         <div className="flex justify-between items-center px-8 py-12 mb-8 text-18">
-          <p className="title">Redeem</p>
+          <p className="text-16">Redeem</p>
         </div>
         <TokenInput
           coinInfo={MisInfo}
           value={formValue}
           onChange={formValueChange}
-          showMax={true}
+          showMax={false}
+          readOnly
           balance={balance}
           extra={<Extra />}
           account={misesAccount}
@@ -319,10 +364,14 @@ function MISToMB() {
           </Button>
         </div>
       </div>
-      <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c]'>
-        <p className='text-[16px] font-200 text-gray-500 leading-6 p-10'>
-        On September 7, 2023, a snapshot of the Mis chain was taken to determine the amount you can redeem. The redeemable quantity is based on this snapshot and cannot exceed the snapshot value. The exchange rate from Mis to MB is set at a 1:1 ratio.
-        </p>
+      <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c] animate__animated animate__zoomIn'>
+        <div className='text-[16px] font-200 text-gray-500 leading-6 p-10 pre whitespace-pre-line'>
+          {`1. The maximum redeemable quantity is based on the snapshot on Sept 7th.
+2. The exchange rate between MIS and MB is 1:1.
+3. Only one redemption is allowed, make sure to redeem all at once.
+4. The minimum redemption quantity is ${accountData?.mb_airdrop?.min_redeem_mis_amount} MIS.`}
+        <p className='mt-10 text-gray-300'>*The gas fee will be deducted from the exchanged MB, so the actual amount of tokens received would be less than the estimated amount.</p>
+        </div>
       </div>
       <Popup
         position='bottom'
@@ -335,17 +384,42 @@ function MISToMB() {
         onClose={() => {
           setshowConfirmDialog(false)
         }}>
+        
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-            Your request for exchange has been duly acknowledged and is anticipated to be processed within several hours. Kindly monitor your wallet for updates.
+          Congratulations！You've successfully redeemed your MB. It will be sent to your Mises wallet within 24 hours.
           </p>
           <div className='flex justify-center items-center mt-40'>
-            <Button className='w-[40%]' onClick={addMB} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-              <span className='text-white'>Add $MB</span>
+            <Button className='w-[40%]' onClick={closeConfirm} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+              <span className='text-white'>Confirm</span>
             </Button>
           </div>
         </div>
       </Popup>
+
+      <Popup
+        position='bottom'
+        showCloseButton
+        bodyClassName="rounded-t-10"
+        onMaskClick={() => {
+          setshowSubmitDialog(false)
+        }}
+        visible={showSubmitDialog}
+        onClose={() => {
+          setshowSubmitDialog(false)
+        }}>
+        <div className='py-30 px-20'>
+          <p className='text-16 leading-[24px] text-gray-500'>
+            Please ensure all MIS for redemption are in your account, as you only have one chance to redeem.
+          </p>
+          <div className='flex justify-center items-center mt-40'>
+            <Button className='w-[40%]' onClick={redeemSubmit} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
+              <span className='text-white'>Comfirm</span>
+            </Button>
+          </div>
+        </div>
+      </Popup>
+      <DownloadPop setDownloadPop={setDownloadPop} downloadPop={downloadPop} />
     </div>
   )
 }

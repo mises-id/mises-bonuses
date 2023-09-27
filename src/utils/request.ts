@@ -1,6 +1,5 @@
 import { Toast } from 'antd-mobile';
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { getToken } from '.';
 const codeMessage: Record<number, string> = {
   200: 'The server successfully returned the requested data.',
   201: 'The data was created or modified successfully.',
@@ -23,7 +22,7 @@ const errorHandler = (error: {
   response: AxiosResponse;
   config: AxiosRequestConfig;
 }) => {
-  const { response, config } = error;
+  const { response } = error;
   if (response && response.status) {
     const errorText =
       response?.data.message || codeMessage[response.status] || response.statusText;
@@ -31,13 +30,16 @@ const errorHandler = (error: {
     Toast.show(errorText);
     return Promise.reject(error);
   }
+
   if (!response) {
+    console.log('No response from server.')
     Toast.show('Bad gateway error.');
     return Promise.reject(error);
   }
-  if (config) {
-    Toast.show('Unknown error');
-  }
+
+  // if (config) {
+  //   Toast.show('Unknown error');
+  // }
   // return response;
   return Promise.reject(error);
 };
@@ -51,7 +53,6 @@ const request = axios.create({
 request.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     if(!config.headers) config.headers = {};
-    if(getToken()) config.headers["Authorization"] = `Bearer ${getToken()}`
     return config;
   },
   function (error:any) {

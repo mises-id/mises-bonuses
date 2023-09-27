@@ -15,8 +15,7 @@
       --background-color: #000000;
       --icon-color: rgb(152, 161, 192);
       --adm-color-text: white;
-      --adm-color-background: #000000;
-      --adm-color-border: rgb(75, 85, 99)
+      --adm-color-primary: #5d61ff
     }
   }
   @media (prefers-color-scheme: light) {
@@ -27,8 +26,7 @@
       --background-color: #f7f7f7;
       --icon-color: #7780a0;
       --adm-color-text: #0d111c;
-      --adm-color-background:#f7f7f7;
-      --adm-color-border: #eee
+      --adm-color-primary: #5d61ff
     }
   }
   body{
@@ -48,6 +46,9 @@
   }
   div{
     line-height:1
+  }
+  .app{
+    background-image: linear-gradient(to bottom, #EEEFFF, #f7f7f7)
   }
 }
 .nav-bg.adm-nav-bar{

@@ -17,7 +17,7 @@ export enum ErrorCode {
 }
 
 export const MBCoinInfo = {
-  "address": '0x361377e6ec0b0e457356f0a6da1b1957df22ece9',
+  "address": '0x394373b15d0f5664ef13b2d052f7105a701cb745',
   "symbol": 'MB',
   "decimals": 18,
   "image": 'logo.png'
@@ -25,7 +25,7 @@ export const MBCoinInfo = {
 
 export const BonusesInfo = {
   "address": '',
-  "symbol": 'Bonuses',
+  "symbol": 'pts',
   "decimals": 1,
   "image": 'logo.png'
 }
@@ -122,9 +122,17 @@ export const getErc20Balance = async (address: string) => {
     }
   }
 }
+type tokenName = 'token' | 'mises-token'
+export function getToken(tokenName: tokenName = "token") {
+  return localStorage.getItem(tokenName)
+}
 
-export function getToken() {
-  return localStorage.getItem('token')
+export function setToken(tokenName: tokenName="token", tokenValue: string) {
+  return localStorage.setItem(tokenName, tokenValue)
+}
+
+export function removeToken(tokenName: tokenName="token") {
+  return localStorage.removeItem(tokenName)
 }
 
 export const TRUNCATED_ADDRESS_START_CHARS = 5;

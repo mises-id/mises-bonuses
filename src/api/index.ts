@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-
+import { getToken } from '@/utils'
 
 export interface accountData {
   "bonus": {
@@ -45,8 +45,13 @@ export async function signin(auth: string): Promise<{
  * fetch bonus count for user account
  */
 export async function fetchBonusCount(): Promise<{"bonus": number}> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
   const { data } = await request({
-    url: '/v1/mining/bonus'
+    url: '/v1/mining/bonus',
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
+    }
   })
   return data
 }
@@ -55,11 +60,16 @@ export async function fetchBonusCount(): Promise<{"bonus": number}> {
  * redeem bonus count
  */
 export async function redeemBonusCount(bonus: number): Promise<boolean> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: '/v1/mining/redeem_bonus',
     method: 'post',
     data: {
       bonus
+    },
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
     }
   })
   return data
@@ -76,22 +86,34 @@ export interface checkMBairdropData {
  * check mises account
  */
 export async function checkMisesAccount(misesid: string): Promise<checkMBairdropData> {
+  const token = getToken('mises-token');
+  if(!token) return Promise.reject()
   const { data } = await request({
-    url: `/v1/mb_airdrop/user/${misesid}`
+    url: `/v1/mb_airdrop/user/${misesid}`,
+    headers: {
+      Authorization: `Bearer ${getToken('mises-token')}`
+    }
   })
+  // data.current_airdrop_limit = data.total_airdrop_limit
   return data
 }
 
 export interface paramsData {
-  receive_address: string
+  receive_address: string,
+  tx_hash?: string,
 }
 /**
  * claim $MB
  */
 export async function claimAirdrop(params: paramsData): Promise<void> {
+  const token = getToken('mises-token');
+  if(!token) return Promise.reject()
   const { data } = await request({
     url: `/v1/mb_airdrop/claim`,
-    params
+    params,
+    headers: {
+      Authorization: `Bearer ${getToken('mises-token')}`
+    }
   })
   return data
 }
@@ -104,8 +126,31 @@ export async function fetchAdMiningData(): Promise<{
   "limit_per_day": number,
   "today_bonus_count": number
 }> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
   const { data } = await request({
-    url: `/v1/ad_mining/me`
+    url: `/v1/ad_mining/me`,
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
+    }
+  })
+  return data
+}
+/**
+ * fetch data for me
+ */
+export async function reportAds(requestData: {
+  ad_type: 'admob'
+}): Promise<void> {
+  const token = getToken('token');
+  if(!token) return Promise.reject()
+  const { data } = await request({
+    url: `/v1/ad_mining/log`,
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getToken('token')}`
+    },
+    data: requestData
   })
   return data
 }

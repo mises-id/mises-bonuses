@@ -1,5 +1,5 @@
 import { checkMisesAccount, signin } from "@/api";
-import { Uint8ArrayToHexString, misesBurnAddress } from "@/utils";
+import { Uint8ArrayToHexString, misesBurnAddress, setToken } from "@/utils";
 import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
@@ -54,7 +54,7 @@ export function useMisesWallet() {
         setisActivating(false)
         checkConnect(provider)
         window.addEventListener("mises_keystorechange", async () => {
-          activate()
+          activate(provider)
         })
       }
     })
@@ -83,11 +83,9 @@ export function useMisesWallet() {
           auth: string
         } = await provider.misesAccount()
         setaccount(result.address)
-        signin(result.auth).then(res=> {
-          localStorage.setItem('token', res.token)
-          // localStorage.setItem('ethAccount', currentAccount)
-          // refresh()
-        })
+        
+        const tokenRes = await signin(result.auth)
+        setToken('mises-token', tokenRes.token)
 
         localStorage.setItem('misesAccount', result.address)
         const params = new URLSearchParams(`?${result.auth}`)
@@ -103,7 +101,7 @@ export function useMisesWallet() {
       } else {
         return Promise.reject({
           code: 9999,
-          message: 'Not found Mises Provider'
+          message: 'Please download Mises Browser'
         })
       }
     } catch (error) {
@@ -114,7 +112,8 @@ export function useMisesWallet() {
   const lcd = useLCDClient()
   
   const sendMisTx = async (
-    value: string
+    value: string,
+    memo: string
   ) => {
     if (!account) {
       return Promise.reject({
@@ -144,7 +143,7 @@ export function useMisesWallet() {
         accountInfo.getAccountNumber(),
         accountInfo.getSequenceNumber(),
         new AuthInfo([], fee),
-        new TxBody(signTx, '')
+        new TxBody(signTx, memo)
       )
       await misesProvider.enable(chainId);
 
