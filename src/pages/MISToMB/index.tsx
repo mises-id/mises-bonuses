@@ -387,7 +387,7 @@ function MISToMB() {
         
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-          Congratulations！You've successfully redeemed your MB. It will be sent to your Mises wallet within 24 hours.
+          Congratulations！You've successfully redeemed your MB. It will be sent to your address within 24 hours.
           </p>
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[40%]' onClick={closeConfirm} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>

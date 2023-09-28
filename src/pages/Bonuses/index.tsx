@@ -77,11 +77,11 @@ function Bonuses() {
   }
 
   useEffect(() => {
-    console.log(`Current document visibility state: ${documentVisibility}`);
+    console.log(`Current document visibility state: ${documentVisibility}`, accounts);
     if(documentVisibility === 'visible') {
       const oldConnectAddress = localStorage.getItem('ethAccount')
 
-      if(currentAccount && oldConnectAddress !== currentAccount) {
+      if(accounts && oldConnectAddress !== accounts[0]) {
         setformValue('')
         settoValue('')
         setLoginFalse()
@@ -89,13 +89,13 @@ function Bonuses() {
         signMsg().then(auth => {
           loginMisesAccount({
             auth,
-            misesId: currentAccount
+            misesId: accounts[0]
           })
         })
       }
     }
 
-    if(!currentAccount) {
+    if(!accounts) {
       window.misesEthereum?.getCachedAuth?.().then(res => {
         console.log('getCachedAuth')
         const token = getToken()
@@ -107,9 +107,8 @@ function Bonuses() {
       })
     }
 
-    console.log(currentAccount, "currentAccount")
     // eslint-disable-next-line
-  }, [documentVisibility, currentAccount]);
+  }, [documentVisibility, accounts]);
 
 
   
@@ -440,7 +439,7 @@ function Bonuses() {
         }}>
         <div className='py-30 px-20'>
           <p className='text-16 leading-[24px] text-gray-500'>
-          Congratulations！You've successfully redeemed your MB. It will be sent to your Mises wallet within 24 hours.
+          Congratulations！You've successfully redeemed your MB. It will be sent to your address within 24 hours.
           </p>
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[40%]' onClick={closeConfirm} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
