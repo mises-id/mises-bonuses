@@ -30,7 +30,7 @@ const DownloadPop:FC<IProps> = ({
           <Button color='primary' shape='rounded' fill='outline' className='flex-1' onClick={()=>setDownloadPop(false)}>Cancel</Button>
           <Button color='primary' shape='rounded' className='flex-1' onClick={() => {
             setDownloadPop(false)
-            window.open('https://www.mises.site/download', 'target=_blank')
+            window.open('https://play.google.com/store/apps/details?id=site.mises.browser', 'target=_blank')
           }}>Download</Button>
         </div>
       </div>
