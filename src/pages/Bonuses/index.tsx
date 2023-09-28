@@ -213,13 +213,15 @@ function Bonuses() {
     async () => {
       try {
         if (chainId !== MBChainId) {
-          return connector.activate(MBChainId)
+          await connector.activate(MBChainId)
+          return sleep(1500);
         }
         return Promise.resolve()
       } catch (error: any) {
         if (error.code === ErrorCode.addChain) {
           // await sleep(500);
-          return connector.activate(MBChainInfo)
+          await connector.activate(MBChainInfo)
+          return sleep(1500);
         }
         return Promise.reject(error)
       }
@@ -366,7 +368,6 @@ function Bonuses() {
   const addMB = async () => {
     try {
       await checkChainId()
-      await sleep(1500);
       connector.watchAsset?.(MBCoinInfo)
     } catch (error) {
       console.log(error, "error====")
