@@ -221,9 +221,13 @@ function Mining() {
     return 'Connect Mises ID'
     //
   }, [isActivating])
+
+  const pendingPopClose = () => {
+    setshowCenterPop(false);
+    setAdsLoadingFalse()
+    window.misesEthereum?.cancelAds?.()
+  }
   
-
-
   const RenderView = () => {
     const token = getToken();
     if (token) {
@@ -311,10 +315,7 @@ function Mining() {
       <CenterPopup
         style={{ '--min-width': '90vw' }}
         showCloseButton
-        onClose={() => {
-          setshowCenterPop(false);
-          setAdsLoadingFalse()
-        }}
+        onClose={pendingPopClose}
         visible={showCenterPop}>
         <div className='py-30 px-10'>
           <div className='loading-icon'>

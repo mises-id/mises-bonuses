@@ -223,6 +223,10 @@ function Bonuses() {
           await connector.activate(MBChainInfo)
           return sleep(1500);
         }
+
+        if(error.code === ErrorCode.hasBeen ) {
+          return Promise.resolve()
+        }
         return Promise.reject(error)
       }
     },
