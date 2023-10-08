@@ -1,24 +1,26 @@
 import { BigNumberish, ethers } from "ethers";
 
-export const MBChainId = 421613;
+export const MBChainId = 42161;
 
 export const MBChainInfo = {
   chainId: MBChainId,
-  chainName: 'Arbitrum Goerli Testnet',
-  rpcUrls: ['https://goerli-rollup.arbitrum.io/rpc'],
+  chainName: 'Arbitrum One',
+  rpcUrls: ['https://arbitrum.llamarpc.com', 'https://rpc.ankr.com/arbitrum'],
   nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-  blockExplorerUrls: ['https://goerli.arbiscan.io/'],
+  blockExplorerUrls: ['https://arbitrum.io/'],
 }
 
 export enum ErrorCode {
   addChain=4902,
   notFoundMises=9999,
-  pleaseWait=-32002
+  pleaseWait=-32002,
+  hasBeen=4001
 }
 
 export const MBCoinInfo = {
-  "address": '0x394373b15d0f5664ef13b2d052f7105a701cb745',
+  "address": '0x9AcfD327448C44E01FeA5D526b61DEf3a9D86217',
   "symbol": 'MB',
+  "name": 'MB',
   "decimals": 18,
   "image": 'logo.png'
 }

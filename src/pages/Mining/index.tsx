@@ -158,11 +158,20 @@ function Mining() {
     })
   }
 
+  // const [loading, setloading] = useState(false)
+
   // const showAds = () => {
-  //   return new Promise<void>((resolve) => {
-  //     setTimeout(() => {
-  //       resolve()
-  //     }, 5000);
+  //   return new Promise<void>((resolve, reject) => {
+  //     if(!loading) {
+  //       setTimeout(() => {
+  //         setloading(true)
+  //         resolve();
+  //       }, 5000);
+  //       return
+  //     }
+  //     reject({
+  //       code: 100
+  //     })
   //   })
   // }
 
@@ -179,12 +188,22 @@ function Mining() {
       await window.misesEthereum?.showAds?.()
       adsCallback()
     } catch (error: any) {
-      if (error.code !== 0) {
-        Toast.show(error.message)
+      if (error.code < 100) {
+        if(error && error.message === "Internal error.") {
+          Toast.show("No ads are available, please check back later")
+        } else {
+          Toast.show(error.message)
+        }
+        logEvent(analytics, 'watched_ads_failed')
       }
+      if(error.code === 100) {
+        setshowCenterPop(true)
+        console.log('await')
+        return
+      }
+      
       setAdsLoadingFalse()
       setshowCenterPop(false)
-      logEvent(analytics, 'watched_ads_failed')
     }
   }
 
@@ -221,9 +240,13 @@ function Mining() {
     return 'Connect Mises ID'
     //
   }, [isActivating])
+
+  const pendingPopClose = () => {
+    setshowCenterPop(false);
+    setAdsLoadingFalse()
+    window.misesEthereum?.cancelAds?.()
+  }
   
-
-
   const RenderView = () => {
     const token = getToken();
     if (token) {
@@ -311,10 +334,7 @@ function Mining() {
       <CenterPopup
         style={{ '--min-width': '90vw' }}
         showCloseButton
-        onClose={() => {
-          setshowCenterPop(false);
-          setAdsLoadingFalse()
-        }}
+        onClose={pendingPopClose}
         visible={showCenterPop}>
         <div className='py-30 px-10'>
           <div className='loading-icon'>

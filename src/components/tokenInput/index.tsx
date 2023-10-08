@@ -62,7 +62,7 @@ const TokenInput:FC<TokenInputProps> = (props) => {
       <div className='flex justify-between mb-6'>
         { account && <p className='flex-1 text-gray-500'>Address: {shortenAddress(account)}</p>}
         <div className='flex-1 text-right dark:text-[#98a1c0] text-[#7780a0]'>
-          {balance!=='' ? <span>Balance: {balanceValue || '0'}{symbol || coinInfo?.symbol}</span> : null }
+          {balance!=='' && balance!==undefined ? <span>Balance: {balanceValue || '0'}{symbol || coinInfo?.symbol}</span> : null }
           {showMaxButton && <span className='text-[#5d61ff] ml-5 cursor-pointer' onClick={setMAX}>MAX</span>}
         </div>
       </div>
