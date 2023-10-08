@@ -158,11 +158,20 @@ function Mining() {
     })
   }
 
+  // const [loading, setloading] = useState(false)
+
   // const showAds = () => {
-  //   return new Promise<void>((resolve) => {
-  //     setTimeout(() => {
-  //       resolve()
-  //     }, 5000);
+  //   return new Promise<void>((resolve, reject) => {
+  //     if(!loading) {
+  //       setTimeout(() => {
+  //         setloading(true)
+  //         resolve();
+  //       }, 5000);
+  //       return
+  //     }
+  //     reject({
+  //       code: 100
+  //     })
   //   })
   // }
 
@@ -179,12 +188,17 @@ function Mining() {
       await window.misesEthereum?.showAds?.()
       adsCallback()
     } catch (error: any) {
-      if (error.code !== 0) {
+      if (error.code < 100) {
         Toast.show(error.message)
+        logEvent(analytics, 'watched_ads_failed')
+      }
+      if(error.code === 100) {
+        setshowCenterPop(true)
+        console.log('await')
+        return
       }
       setAdsLoadingFalse()
       setshowCenterPop(false)
-      logEvent(analytics, 'watched_ads_failed')
     }
   }
 
