@@ -304,7 +304,7 @@ function Mining() {
             </div>
           </div>
         </div>
-        <a href="https://mining.test.mises.site/bonuses" target='_blank' rel="noreferrer"
+        <a href="/bonuses" target='_blank' rel="noreferrer"
           className='text-16 fixed bottom-20 left-1/2 -translate-x-1/2' style={{ textDecoration: 'none' }}>
           Link to redeem
         </a>
