@@ -324,6 +324,14 @@ function MISToMB() {
     return <div className='text-right mt-10 text-[#7780a0]'>limit: {limit}MIS</div>
   }
 
+  const isEnds = useMemo(() => {
+    console.log(accountData, 'accountData')
+    if(!accountData) {
+      return false
+    }
+    return accountData?.mb_airdrop.mis_redeem_status === 0
+  }, [accountData])
+
   return (
     <div>
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
@@ -363,7 +371,7 @@ function MISToMB() {
             <span className='text-[white] text-18'>{ButtonText}</span>
           </Button>
         </div>
-        {accountData?.mb_airdrop.mis_redeem_status !== 1 && <div className='animate__animated animate__fadeIn absolute left-0 top-0 right-0 bottom-0 bg-white dark:bg-block bg-opacity-70 z-20 rounded-xl flex items-center justify-center text-20'>
+        {isEnds && <div className='animate__animated animate__fadeIn absolute left-0 top-0 right-0 bottom-0 bg-white dark:bg-block bg-opacity-70 z-20 rounded-xl flex items-center justify-center text-20'>
           <span>Redemption time has expired</span>
         </div>}
       </div>
