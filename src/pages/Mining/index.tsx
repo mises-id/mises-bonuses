@@ -1,6 +1,6 @@
 import { fetchAdMiningData, reportAds, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
-import { getToken, removeToken, setToken, shortenAddress } from '@/utils';
+import { getSwapLink, getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
 import { Button, CenterPopup, Image, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -276,7 +276,7 @@ function Mining() {
                 fill='outline'
                 shape='rounded'
                 onClick={() => {
-                  window.open('https://swap.test.mises.site', 'target=_blank');
+                  window.open(getSwapLink(), 'target=_blank');
                 }}>
                 <span className='text-12 px-10'>GO</span>
               </Button>

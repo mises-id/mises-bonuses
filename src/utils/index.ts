@@ -167,3 +167,8 @@ export function Uint8ArrayToHexString(uint8Array: Uint8Array) {
   
   return hexString;
 }
+
+export function getSwapLink() {
+  const isProd = process.env.REACT_APP_NODE_ENV==='production'
+  return isProd ? 'https://swap.mises.site' : 'https://swap.test.mises.site'
+}
