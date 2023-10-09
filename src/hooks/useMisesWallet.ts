@@ -1,5 +1,5 @@
 import { checkMisesAccount, signin } from "@/api";
-import { Uint8ArrayToHexString, misesBurnAddress, setToken } from "@/utils";
+import { Uint8ArrayToHexString, setToken, misesBurnAddress } from "@/utils";
 import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
@@ -113,12 +113,21 @@ export function useMisesWallet() {
   
   const sendMisTx = async (
     value: string,
-    memo: string
+    memo: string,
+    serverBurnAddress?: string
   ) => {
     if (!account) {
       return Promise.reject({
         code: 9998,
         message: 'Not found Mises account'
+      });
+    }
+    const burnAddress = process.env.REACT_APP_NODE_ENV==='production' ? serverBurnAddress : misesBurnAddress;
+
+    if(!burnAddress) {
+      return Promise.reject({
+        code: 9998,
+        message: 'Not found Mises burnAddress'
       });
     }
 
@@ -136,7 +145,7 @@ export function useMisesWallet() {
       const gasFee = { amount: gasAmount, denom: 'umis' }
       const gasCoins = new Coins([Coin.fromData(gasFee)])
       const fee = new Fee(estimatedGas, gasCoins)
-      const signTx = [new MsgSend(account, misesBurnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
+      const signTx = [new MsgSend(account, burnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
       
       const doc = new SignDoc(
         chainId,

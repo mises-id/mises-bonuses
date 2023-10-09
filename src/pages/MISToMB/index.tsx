@@ -78,7 +78,7 @@ function MISToMB() {
         }
       }
       if(checkAccountData?.current_airdrop_limit === 0) {
-        seterrorTxt('No redemption limit left')
+        seterrorTxt('Redeemed')
       }
       if(checkAccountData?.current_airdrop_limit) {
         const limit = formatAmount(`${checkAccountData.current_airdrop_limit}`, 6)
@@ -268,7 +268,7 @@ function MISToMB() {
         await checkUserAddress()
         setshowSubmitDialog(false)
         if(formValue && accounts) {
-          const txData = await sendMisTx(formValue, accounts[0])
+          const txData = await sendMisTx(formValue, accounts[0], accountData?.mb_airdrop?.mis_redeem_receiver_misesid)
           await setClaimReceiveAddress(txData.transactionHash)
         }
         resetData()
@@ -327,7 +327,7 @@ function MISToMB() {
   return (
     <div>
       <p className='p-20 text-16 m-0'>Redeem <span className='font-bold text-[#5d61ff]'>MIS</span> for <span className='font-bold text-[#5d61ff]'>MB</span></p>
-      <div className='container bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px]'>
+      <div className='container bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px] relative'>
         <div className="flex justify-between items-center px-8 py-12 mb-8 text-18">
           <p className="text-16">Redeem</p>
         </div>
@@ -363,6 +363,9 @@ function MISToMB() {
             <span className='text-[white] text-18'>{ButtonText}</span>
           </Button>
         </div>
+        {accountData?.mb_airdrop.mis_redeem_status !== 1 && <div className='animate__animated animate__fadeIn absolute left-0 top-0 right-0 bottom-0 bg-white dark:bg-block bg-opacity-70 z-20 rounded-xl flex items-center justify-center text-20'>
+          <span>Redemption time has expired</span>
+        </div>}
       </div>
       <div className='container w-[95%]  md:w-[450px] bg-white dark:bg-[#0d111c] animate__animated animate__zoomIn'>
         <div className='text-[16px] font-200 text-gray-500 leading-6 p-10 pre whitespace-pre-line'>

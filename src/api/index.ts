@@ -11,6 +11,9 @@ export interface accountData {
   },
   "mb_airdrop": {
     "min_redeem_mis_amount": number
+    "mis_redeem_mb_fee": number
+    "mis_redeem_receiver_misesid": string
+    "mis_redeem_status": number
   }
 }
 
