@@ -10,7 +10,7 @@ import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks'
 import { usePageValue } from '@/components/pageProvider'
 import BigNumber from 'bignumber.js'
 import DownloadPop from '@/components/DownloadPop'
-const { useChainId, useAccounts, useIsActivating, useProvider } = hooks
+const { useAccounts, useIsActivating, useProvider } = hooks
 
 function Bonuses() {
   const [showConfirmDialog, setshowConfirmDialog] = useState(false)
@@ -34,7 +34,7 @@ function Bonuses() {
 
   const { connector } = useWeb3React();
 
-  const chainId = useChainId()
+  // const chainId = useChainId()
   const accounts = useAccounts()
   const isActivating = useIsActivating()
 
