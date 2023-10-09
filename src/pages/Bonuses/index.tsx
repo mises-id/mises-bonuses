@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './index.less'
 import TokenInput from '@/components/tokenInput'
 import { Button, Popup, Toast } from 'antd-mobile'
 import { useWeb3React } from '@web3-react/core'
 import { hooks, metaMask } from '@/components/Web3Provider/metamask'
-import { BonusesInfo, ErrorCode, MBChainId, MBChainInfo, MBCoinInfo, getErc20Balance, getToken, removeToken, setToken, shortenAddress } from '@/utils'
+import { BonusesInfo, MBCoinInfo, getErc20Balance, getToken, removeToken, setToken, shortenAddress } from '@/utils'
 import { fetchBonusCount, redeemBonusCount, signin } from '@/api'
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks'
 import { usePageValue } from '@/components/pageProvider'
@@ -209,29 +209,29 @@ function Bonuses() {
     }
   }
 
-  const checkChainId = useCallback(
-    async () => {
-      try {
-        if (chainId !== MBChainId) {
-          await connector.activate(MBChainId)
-          return sleep(1500);
-        }
-        return Promise.resolve()
-      } catch (error: any) {
-        if (error.code === ErrorCode.addChain) {
-          // await sleep(500);
-          await connector.activate(MBChainInfo)
-          return sleep(1500);
-        }
+  // const checkChainId = useCallback(
+  //   async () => {
+  //     try {
+  //       if (chainId !== MBChainId) {
+  //         await connector.activate(MBChainId)
+  //         return sleep(1500);
+  //       }
+  //       return Promise.resolve()
+  //     } catch (error: any) {
+  //       if (error.code === ErrorCode.addChain) {
+  //         // await sleep(500);
+  //         await connector.activate(MBChainInfo)
+  //         return sleep(1500);
+  //       }
 
-        if(error.code === ErrorCode.hasBeen ) {
-          return Promise.resolve()
-        }
-        return Promise.reject(error)
-      }
-    },
-    [connector, chainId],
-  )
+  //       if(error.code === ErrorCode.hasBeen ) {
+  //         return Promise.resolve()
+  //       }
+  //       return Promise.reject(error)
+  //     }
+  //   },
+  //   [connector, chainId],
+  // )
 
   const sleep = (milliseconds: number) => {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -369,14 +369,14 @@ function Bonuses() {
       settoValue(value)
     }
   }
-  const addMB = async () => {
-    try {
-      await checkChainId()
-      connector.watchAsset?.(MBCoinInfo)
-    } catch (error) {
-      console.log(error, "error====")
-    }
-  }
+  // const addMB = async () => {
+  //   try {
+  //     await checkChainId()
+  //     connector.watchAsset?.(MBCoinInfo)
+  //   } catch (error) {
+  //     console.log(error, "error====")
+  //   }
+  // }
 
   return (
     <div>
@@ -391,7 +391,7 @@ function Bonuses() {
       <div className='container bg-white dark:bg-[#0d111c] w-[95%] md:w-[450px]'>
         <div className="flex items-center px-8 py-12 mb-8 text-18">
           <p className="title">Redeem</p>
-          <p className="title ml-10 text-gray-400" onClick={() => {window.open('https://mining.test.mises.site/mining', 'target=_blank')}}>Mining</p>
+          <p className="title ml-10 text-gray-400" onClick={() => {window.open('/mining', 'target=_blank')}}>Mining</p>
         </div>
         <TokenInput
           coinInfo={BonusesInfo}
@@ -433,7 +433,7 @@ function Bonuses() {
             {`1. The exchange rate between Reward Points and MB is 1:${accountData?.bonus.bonus_to_mb_rate || ''}
 2. Minimum redemption of ${accountData?.bonus?.min_redeem_bonus_amount || ''} Reward Points.`}
             <p className='mt-10 text-gray-300'>*The gas fee will be deducted from the exchanged MB, so the actual amount of tokens received would be less than the estimated amount.</p>
-            <div className='flex justify-end mt-10 text-[#5d61ff] font-bold' onClick={addMB}>Add MB</div>
+            {/* <div className='flex justify-end mt-10 text-[#5d61ff] font-bold' onClick={addMB}>Add MB</div> */}
           </div>
         </div>
       </div>
