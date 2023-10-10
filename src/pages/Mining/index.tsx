@@ -133,11 +133,11 @@ function Mining() {
         const token = getToken()
         !token && loginMisesAccount(res)
       }).catch(err => {
-        console.log(err, 'getCachedAuth:error')
+        console.log(err, 'getCachedAuth: error')
+        setauthAccount('')
         removeToken('token')
         localStorage.removeItem('ethAccount')
         setloading(false)
-        setauthAccount('')
       })
     }
     console.log(accounts, 'accounts')
