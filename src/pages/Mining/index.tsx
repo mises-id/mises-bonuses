@@ -348,7 +348,6 @@ function Mining() {
           </Button>
         </div>
       </> : null}
-      {!currentAccount && loading ? <Loading /> : null}
       <CenterPopup
         style={{ '--min-width': '90vw' }}
         showCloseButton
