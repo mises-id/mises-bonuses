@@ -2,7 +2,7 @@ import { fetchAdMiningData, reportAds, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getSwapLink, getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
-import { Button, CenterPopup, DotLoading, Image, Toast } from 'antd-mobile'
+import { Button, CenterPopup, Image, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -328,9 +328,9 @@ function Mining() {
 
   // const token = getToken();
 
-  const Loading = () => {
-    return <div className='flex justify-center py-30'><DotLoading /></div>
-  }
+  // const Loading = () => {
+  //   return <div className='flex justify-center py-30'><DotLoading /></div>
+  // }
 
   return (
     <div className={`h-screen bg-white ${currentAccount ? 'bg-gradient-to-b' : ''}  from-[#ebe0f0] to-[#d0defb] flex flex-col`}>
