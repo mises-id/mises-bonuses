@@ -2,7 +2,7 @@ import { fetchAdMiningData, reportAds, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getSwapLink, getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
-import { Button, CenterPopup, DotLoading, Image, SpinLoading, Toast } from 'antd-mobile'
+import { Button, CenterPopup, DotLoading, Image, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -76,11 +76,10 @@ function Mining() {
     misesId: string
   }) => {
     try {
-      setloading(true)
-      const res = await signin(params.auth)
-      setToken('token', res.token)
       localStorage.setItem('ethAccount', params.misesId)
       setauthAccount(params.misesId)
+      const res = await signin(params.auth)
+      setToken('token', res.token)
       refresh()
       setloading(false)
     } catch (error) {
@@ -126,7 +125,9 @@ function Mining() {
     if(!accounts) {
       if(!window.misesEthereum?.getCachedAuth) {
         setloading(false)
+        return
       }
+      setloading(true)
       window.misesEthereum?.getCachedAuth?.().then(res => {
         console.log('getCachedAuth')
         const token = getToken()
@@ -136,6 +137,7 @@ function Mining() {
         removeToken('token')
         localStorage.removeItem('ethAccount')
         setloading(false)
+        setauthAccount('')
       })
     }
     console.log(accounts, 'accounts')
@@ -259,8 +261,8 @@ function Mining() {
   }
   
   const RenderView = () => {
-    const token = getToken();
-    if (token) {
+    // const token = getToken();
+    if (currentAccount) {
       // 
       return <>
         <div className='px-15'>
@@ -324,16 +326,16 @@ function Mining() {
     return null;
   };
 
-  const token = getToken();
+  // const token = getToken();
 
   const Loading = () => {
     return <div className='flex justify-center py-30'><DotLoading /></div>
   }
 
   return (
-    <div className={`h-screen bg-white ${token ? 'bg-gradient-to-b' : ''}  from-[#ebe0f0] to-[#d0defb] flex flex-col`}>
+    <div className={`h-screen bg-white ${currentAccount ? 'bg-gradient-to-b' : ''}  from-[#ebe0f0] to-[#d0defb] flex flex-col`}>
       <RenderView />
-      {!token && !loading ? <>
+      {!currentAccount && !loading ? <>
         <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
         <div style={{ minHeight: 160 }}>
           <img src="./images/me-bg.png" alt="bg" width="100%" className="block" />
@@ -346,7 +348,7 @@ function Mining() {
           </Button>
         </div>
       </> : null}
-      {!token && loading ? <Loading /> : null}
+      {!currentAccount && loading ? <Loading /> : null}
       <CenterPopup
         style={{ '--min-width': '90vw' }}
         showCloseButton
