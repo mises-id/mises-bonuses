@@ -2,7 +2,7 @@ import { fetchAdMiningData, reportAds, signin } from '@/api';
 import { usePageValue } from '@/components/pageProvider';
 import { getSwapLink, getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
-import { Button, CenterPopup, Image, Toast } from 'antd-mobile'
+import { Button, CenterPopup, DotLoading, Image, SpinLoading, Toast } from 'antd-mobile'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -26,6 +26,8 @@ function Mining() {
   const [continuePop, setcontinuePop] = useState(false)
   const [downloadPop, setDownloadPop] = useState(false)
   const [authAccount, setauthAccount] = useState('')
+  const [loading, setloading] = useState(true)
+
   const currentAccount = useMemo(() => {
     if (accounts?.length) {
       return accounts[0]
@@ -33,7 +35,6 @@ function Mining() {
     const connectAddress = localStorage.getItem('ethAccount')
     return connectAddress || authAccount || ''
   }, [accounts, authAccount])
-
 
   // const [signLoading, { setTrue: setsignLoadingTrue, setFalse: setsignLoadingFalse }] = useBoolean(true)
 
@@ -75,13 +76,15 @@ function Mining() {
     misesId: string
   }) => {
     try {
+      setloading(true)
       const res = await signin(params.auth)
       setToken('token', res.token)
       localStorage.setItem('ethAccount', params.misesId)
       setauthAccount(params.misesId)
       refresh()
+      setloading(false)
     } catch (error) {
-      
+      setloading(false)
     }
   }
 
@@ -107,6 +110,10 @@ function Mining() {
     metaMask.connectEagerly().catch(() => {
       console.debug('Failed to connect eagerly to metamask')
     })
+    const token = getToken()
+    if(token) {
+      setloading(false)
+    }
   }, [])
 
   const documentVisibility = useDocumentVisibility();
@@ -117,6 +124,9 @@ function Mining() {
       loginMises()
     }
     if(!accounts) {
+      if(!window.misesEthereum?.getCachedAuth) {
+        setloading(false)
+      }
       window.misesEthereum?.getCachedAuth?.().then(res => {
         console.log('getCachedAuth')
         const token = getToken()
@@ -125,9 +135,10 @@ function Mining() {
         console.log(err, 'getCachedAuth:error')
         removeToken('token')
         localStorage.removeItem('ethAccount')
+        setloading(false)
       })
     }
-    console.log(accounts)
+    console.log(accounts, 'accounts')
     // eslint-disable-next-line
   }, [documentVisibility, accounts]);
 
@@ -315,10 +326,14 @@ function Mining() {
 
   const token = getToken();
 
+  const Loading = () => {
+    return <div className='flex justify-center py-30'><DotLoading /></div>
+  }
+
   return (
     <div className={`h-screen bg-white ${token ? 'bg-gradient-to-b' : ''}  from-[#ebe0f0] to-[#d0defb] flex flex-col`}>
       <RenderView />
-      {!token && <>
+      {!token && !loading ? <>
         <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
         <div style={{ minHeight: 160 }}>
           <img src="./images/me-bg.png" alt="bg" width="100%" className="block" />
@@ -330,7 +345,8 @@ function Mining() {
             <span className='text-white block text-18'>{buttonText}</span>
           </Button>
         </div>
-      </>}
+      </> : null}
+      {!token && loading ? <Loading /> : null}
       <CenterPopup
         style={{ '--min-width': '90vw' }}
         showCloseButton
