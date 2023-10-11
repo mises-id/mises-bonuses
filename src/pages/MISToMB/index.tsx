@@ -242,7 +242,8 @@ function MISToMB() {
         return
       }
       setFalse()
-      if(error.message) {
+
+      if(error && error.code !== 1) {
         Toast.show(error.message)
       }
       console.log(error.message, 'error')

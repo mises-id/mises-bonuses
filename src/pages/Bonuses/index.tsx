@@ -46,7 +46,9 @@ function Bonuses() {
       accountRef.current = accounts[0]
       return accounts[0]
     }
-    return authAccount || ''
+
+    const connectAddress = localStorage.getItem('ethAccount')
+    return authAccount || connectAddress || ''
   }, [accounts, authAccount])
 
   useEffect(() => {
@@ -65,10 +67,10 @@ function Bonuses() {
     misesId: string
   }) => {
     try {
-      const res = await signin(params.auth)
-      setToken('token', res.token);
       setauthAccount(params.misesId)
       localStorage.setItem('ethAccount', params.misesId)
+      const res = await signin(params.auth)
+      setToken('token', res.token);
       refresh()
       setLoginTrue()
     } catch (error) {
@@ -86,6 +88,7 @@ function Bonuses() {
         settoValue('')
         setLoginFalse()
         removeToken('token')
+        setauthAccount('')
         signMsg().then(auth => {
           loginMisesAccount({
             auth,
@@ -99,7 +102,9 @@ function Bonuses() {
       window.misesEthereum?.getCachedAuth?.().then(res => {
         console.log('getCachedAuth')
         const token = getToken()
+        const oldConnectAddress = localStorage.getItem('ethAccount')
         !token && loginMisesAccount(res)
+        res.misesId !== oldConnectAddress && token && loginMisesAccount(res)
       }).catch(err => {
         console.log(err, 'getCachedAuth:error')
         removeToken('token')
