@@ -22,7 +22,7 @@ export const MBCoinInfo = {
   "symbol": 'MB',
   "name": 'MB',
   "decimals": 18,
-  "image": 'logo.png'
+  "image": 'https://cdn.mises.site/s3://mises-storage/resources/token-icons/mb.png'
 }
 
 export const BonusesInfo = {
