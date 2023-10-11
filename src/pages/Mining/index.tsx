@@ -100,7 +100,9 @@ function Mining() {
         })
       }).catch(error => {
         console.log(error, 'error')
-        Toast.show(error.message)
+        if(error && error.message) {
+          Toast.show(error.message)
+        }
       })
     }
   }
