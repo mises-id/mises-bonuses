@@ -11,6 +11,7 @@ import { useWeb3React } from '@web3-react/core';
 import './index.less';
 import { logEvent } from 'firebase/analytics';
 import DownloadPop from '@/components/DownloadPop';
+import { SendOutline } from 'antd-mobile-icons';
 
 const { useAccounts, useIsActivating } = hooks
 
@@ -267,21 +268,32 @@ function Mining() {
     if (currentAccount) {
       // 
       return <>
+        <div className='flex justify-between'>
+          <p className='p-20 text-16 m-0'><span className='font-bold text-[#5d61ff]'>Mises Mining</span></p>
+          {currentAccount && <div className='flex items-center mr-15'>
+            <div className='rounded-2xl p-10 bg-white dark:bg-[#131a2a]'>
+              {shortenAddress(currentAccount)}
+            </div>
+          </div>}
+        </div>
         <div className='px-15'>
-          <p className='pt-30 leading-10 text-26 bg-gradient-to-b from-[red] to-[#5d61ff] text-transparent bg-clip-text'>
-            Mises Mining
-          </p>
-          {currentAccount && <p className='mt-20 text-20 font-bold'>{shortenAddress(currentAccount)}</p>}
-          <div className='mt-20'>
-            <p className='text-20 leading-8 text-[#5d61ff] font-bold tracking-wider bg-gradient-to-b from-[#CE9FFC] to-[#5d61ff] text-transparent bg-clip-text'>
+          <div className='mt-20 task-item bg-white dark:bg-transparent rounded-lg py-20 px-15'>
+            <p className='text-14 leading-7 tracking-wider'>
               Upon successfully finishing the assigned tasks, you will be rewarded with mises reward points,
               which can later be converted into MB.
             </p>
+            <div className='flex justify-end mt-20 text-[#5d61ff]'>
+              <a href="/bonuses" target='_blank' rel="noreferrer"
+                className='text-14'>
+                Link to redeem
+                <SendOutline className='ml-5'/>
+              </a>
+            </div>
           </div>
         </div>
         <div className='px-15'>
-          <div className='bg-white flex justify-between rounded-lg py-10 px-15 mt-55'>
-            <span className='text-gray-600 py-15 text-16' >
+          <div className='flex justify-between rounded-lg py-10 px-15 task-item mt-55 bg-white dark:bg-transparent'>
+            <span className='text-gray-600 dark:text-white py-15 text-16' >
               Swap with Mises
             </span>
             <div className='flex items-center'>
@@ -297,9 +309,9 @@ function Mining() {
               </Button>
             </div>
           </div>
-          <div className='bg-white flex justify-between rounded-lg px-15 py-14 mt-20'>
+          <div className='flex justify-between rounded-lg px-15 py-14 mt-20 task-item bg-white dark:bg-transparent'>
             <div>
-              <span className='mb-10 block text-gray-600 text-16'>
+              <span className='mb-10 block dark:text-white text-gray-600 text-16'>
                 Watch rewarded video ads
               </span>
               <p className='mt-5 text-gray-500'>
@@ -319,10 +331,6 @@ function Mining() {
             </div>
           </div>
         </div>
-        <a href="/bonuses" target='_blank' rel="noreferrer"
-          className='text-16 fixed bottom-20 left-1/2 -translate-x-1/2' style={{ textDecoration: 'none' }}>
-          Link to redeem
-        </a>
       </>
     }
     return null;
@@ -335,7 +343,7 @@ function Mining() {
   // }
 
   return (
-    <div className={`h-screen bg-white ${currentAccount ? 'bg-gradient-to-b' : ''}  from-[#ebe0f0] to-[#d0defb] flex flex-col`}>
+    <div className={`h-screen  flex flex-col`}>
       <RenderView />
       {!currentAccount && !loading ? <>
         <p className='p-20 text-16 m-0 font-bold text-[#5d61ff] fixed inset-x-0 top-0'>Mises Mining</p>
