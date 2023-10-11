@@ -131,7 +131,9 @@ function Mining() {
       window.misesEthereum?.getCachedAuth?.().then(res => {
         console.log('getCachedAuth')
         const token = getToken()
+        const oldConnectAddress = localStorage.getItem('ethAccount')
         !token && loginMisesAccount(res)
+        res.misesId !== oldConnectAddress && token && loginMisesAccount(res)
       }).catch(err => {
         console.log(err, 'getCachedAuth: error')
         setauthAccount('')
