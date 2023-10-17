@@ -207,12 +207,13 @@ function Mining() {
       adsCallback()
     } catch (error: any) {
       if (error.code < 100) {
-        if(error && error.message === "Internal error.") {
-          Toast.show("No ads are available, please check back later")
-        } else {
+        if(error && error.message) {
           Toast.show(error.message)
         }
-        logEvent(analytics, 'watched_ads_failed')
+        logEvent(analytics, 'watched_ads_failed', {
+          error_code: error.code,
+          error_message: error.message
+        })
       }
       if(error.code === 100) {
         setshowCenterPop(true)
