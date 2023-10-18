@@ -226,7 +226,7 @@ function Mining() {
     }
   }
 
-  const { accountData } = usePageValue()
+  //const { accountData } = usePageValue()
 
   const { data: adMiningData, run, refresh, error } = useRequest(fetchAdMiningData, {
     retryCount: 3,
