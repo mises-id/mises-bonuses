@@ -312,7 +312,7 @@ function Mining() {
               </Button>
             </div>
           </div>
-          <div className='flex justify-between rounded-lg px-15 py-14 mt-20 task-item bg-white dark:bg-transparent'>
+          {/* <div className='flex justify-between rounded-lg px-15 py-14 mt-20 task-item bg-white dark:bg-transparent'>
             <div>
               <span className='mb-10 block dark:text-white text-gray-600 text-16'>
                 Watch rewarded video ads
@@ -332,7 +332,7 @@ function Mining() {
                 <span className='text-12 px-10'>GO</span>
               </Button>
             </div>
-          </div>
+          </div> */}
         </div>
       </>
     }
