@@ -176,6 +176,7 @@ export function useMisesWallet() {
         msgs: txString,
         gasLimit: fee.gas_limit,
         gasFee: [gasFee],
+        memo
       })
     } catch (error) {
       return Promise.reject(error)
