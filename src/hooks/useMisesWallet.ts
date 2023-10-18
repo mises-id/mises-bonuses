@@ -174,6 +174,7 @@ export function useMisesWallet() {
 
       return await misesProvider.staking({
         msgs: txString,
+        memo: memo,
         gasLimit: fee.gas_limit,
         gasFee: [gasFee],
       })
