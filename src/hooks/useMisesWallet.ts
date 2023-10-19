@@ -4,7 +4,7 @@ import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
 import BigNumber from "bignumber.js";
-import { AuthInfo, Coin, Coins, Fee, MsgSend, SignDoc, TxBody, SignatureV2, SimplePublicKey, SignerInfo, ModeInfo } from "@terra-money/terra.js";
+import { AuthInfo, Coin, Coins, Fee, MsgSend, SignDoc, TxBody, SignerInfo, ModeInfo } from "@terra-money/terra.js";
 import { AuthInfo as CosmosAuthInfo } from "@terra-money/terra.proto/cosmos/tx/v1beta1/tx";
 export async function walletProvider() {
   if (window.misesWallet) {
