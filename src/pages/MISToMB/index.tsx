@@ -269,8 +269,8 @@ function MISToMB() {
         await checkUserAddress()
         setshowSubmitDialog(false)
         if(formValue && accounts) {
-          const txData = await sendMisTx(formValue, accounts[0], accountData?.mb_airdrop?.mis_redeem_receiver_misesid)
-          await setClaimReceiveAddress(txData.transactionHash)
+          const txhash = await sendMisTx(formValue, accounts[0], accountData?.mb_airdrop?.mis_redeem_receiver_misesid)
+          await setClaimReceiveAddress(txhash)
         }
         resetData()
       }

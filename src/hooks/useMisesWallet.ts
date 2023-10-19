@@ -4,8 +4,8 @@ import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
 import BigNumber from "bignumber.js";
-import { AuthInfo, Coin, Coins, Fee, Msg, MsgSend, SignDoc, TxBody } from "@terra-money/terra.js";
-
+import { AuthInfo, Coin, Coins, Fee, MsgSend, SignDoc, TxBody, SignatureV2, SimplePublicKey, SignerInfo, ModeInfo } from "@terra-money/terra.js";
+import { AuthInfo as CosmosAuthInfo } from "@terra-money/terra.proto/cosmos/tx/v1beta1/tx";
 export async function walletProvider() {
   if (window.misesWallet) {
     return window.misesWallet;
@@ -135,49 +135,75 @@ export function useMisesWallet() {
       const sendValue = BigNumber(value).multipliedBy(BigNumber(10).pow(6)).toString()
       const accountInfo = await lcd.auth.accountInfo(account)
       const estimatedGas = 2000000
-
       const gasAmount = BigNumber(estimatedGas)
         .times(0.0001)
         .integerValue(BigNumber.ROUND_CEIL)
         .toString()
       console.log(gasAmount)
       
-      const gasFee = { amount: gasAmount, denom: 'umis' }
-      const gasCoins = new Coins([Coin.fromData(gasFee)])
+      //const gasFee = { amount: gasAmount, denom: 'umis' }
+      const gasCoins = new Coins([])
       const fee = new Fee(estimatedGas, gasCoins)
-      const signTx = [new MsgSend(account, burnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
-      
+      const messages = [new MsgSend(account, burnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
+      const sequence =  accountInfo.getSequenceNumber()
+      const pubkey =  accountInfo.getPublicKey()
+      const signerInfo = new SignerInfo(
+        pubkey!,
+        sequence,
+        new ModeInfo(
+          new ModeInfo.Single(ModeInfo.SignMode.SIGN_MODE_DIRECT)
+        )
+      );
       const doc = new SignDoc(
         chainId,
         accountInfo.getAccountNumber(),
-        accountInfo.getSequenceNumber(),
-        new AuthInfo([], fee),
-        new TxBody(signTx, memo)
+        sequence,
+        new AuthInfo([signerInfo], fee),
+        new TxBody(messages, memo)
       )
       await misesProvider.enable(chainId);
+      
+      const signResp = await misesProvider.signDirect(chainId, account, doc.toProto(), {})
+      console.log( CosmosAuthInfo.decode(doc.toProto().authInfoBytes))
+      // const txString = signTx.map((val: Msg) => {
+      //   const msg = JSON.parse(val.toJSON())
+      //   const newMsg = {} as { [key: string]: any }
+      //   for (const key in msg) {
+      //     const labelKey = key as string
+      //     newMsg[`${toHump(labelKey)}`] = msg[key]
+      //   }
+      //   delete newMsg["@type"]
+      //   return {
+      //     typeUrl: msg["@type"],
+      //     value: newMsg,
+      //   }
+      // })
+      const tx = doc.toUnSignedTx()
+      console.log(signResp)
+      // const sig = Buffer.from(signResp.signature.signature, 'base64').toString()
+      // const sigv2 = new SignatureV2(
+      //   new SimplePublicKey(signResp.signature.pub_key.value),
+      //   new SignatureV2.Descriptor(
+      //     new SignatureV2.Descriptor.Single(SignatureV2.SignMode.SIGN_MODE_DIRECT, sig)
+      //   ),
+      //   sequence
+      // );
+      // tx.clearSignatures()
+      tx.signatures.push(signResp.signature.signature)
+      console.log(CosmosAuthInfo.decode(signResp.signed.authInfoBytes))
+      const txhash = await lcd.tx.hash(tx)
+      console.log(txhash)
+      const broadcastResp = await lcd.tx.broadcastBlock(tx)
 
-      await misesProvider.signAmino(chainId, account, doc.toAmino(), {})
-
-      const txString = signTx.map((val: Msg) => {
-        const msg = JSON.parse(val.toJSON())
-        const newMsg = {} as { [key: string]: any }
-        for (const key in msg) {
-          const labelKey = key as string
-          newMsg[`${toHump(labelKey)}`] = msg[key]
-        }
-        delete newMsg["@type"]
-        return {
-          typeUrl: msg["@type"],
-          value: newMsg,
-        }
-      })
-
-      return await misesProvider.staking({
-        msgs: txString,
-        memo: memo,
-        gasLimit: fee.gas_limit,
-        gasFee: [gasFee],
-      })
+      console.log(broadcastResp)
+      return txhash;
+      
+      // return await misesProvider.staking({
+      //   msgs: txString,
+      //   memo: memo,
+      //   gasLimit: fee.gas_limit,
+      //   gasFee: [gasFee],
+      // })
     } catch (error) {
       return Promise.reject(error)
     }
