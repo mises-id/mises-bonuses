@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-    name: fiat-mises node ${{ matrix.node-version }}
+    name: mises-bonuses node ${{ matrix.node-version }}
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2

@@ -38,7 +38,7 @@ export const MisInfo = {
   "image": 'logo.png'
 }
 
-export const misesBurnAddress = "mises1y4x4fyf07l54n3p0mw393guzugn0he8k7zkr4v"
+export const misesBurnAddress = "mises1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqunwlz3"
 
 export function formatAmount(value: string, unitName?: BigNumberish): string {
   const formatAmount = ethers.formatUnits(value || 0, Number(unitName))

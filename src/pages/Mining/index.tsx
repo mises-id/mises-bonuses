@@ -1,5 +1,5 @@
 import { fetchAdMiningData, reportAds, signin } from '@/api';
-import { usePageValue } from '@/components/pageProvider';
+//import { usePageValue } from '@/components/pageProvider';
 import { getSwapLink, getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
 import { Button, CenterPopup, Image, Toast } from 'antd-mobile'
@@ -226,7 +226,7 @@ function Mining() {
     }
   }
 
-  const { accountData } = usePageValue()
+  //const { accountData } = usePageValue()
 
   const { data: adMiningData, run, refresh, error } = useRequest(fetchAdMiningData, {
     retryCount: 3,
@@ -312,7 +312,7 @@ function Mining() {
               </Button>
             </div>
           </div>
-          <div className='flex justify-between rounded-lg px-15 py-14 mt-20 task-item bg-white dark:bg-transparent'>
+          {/* <div className='flex justify-between rounded-lg px-15 py-14 mt-20 task-item bg-white dark:bg-transparent'>
             <div>
               <span className='mb-10 block dark:text-white text-gray-600 text-16'>
                 Watch rewarded video ads
@@ -332,7 +332,7 @@ function Mining() {
                 <span className='text-12 px-10'>GO</span>
               </Button>
             </div>
-          </div>
+          </div> */}
         </div>
       </>
     }

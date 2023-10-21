@@ -269,8 +269,8 @@ function MISToMB() {
         await checkUserAddress()
         setshowSubmitDialog(false)
         if(formValue && accounts) {
-          const txData = await sendMisTx(formValue, accounts[0], accountData?.mb_airdrop?.mis_redeem_receiver_misesid)
-          await setClaimReceiveAddress(txData.transactionHash)
+          const txhash = await sendMisTx(formValue, accounts[0], accountData?.mb_airdrop?.mis_redeem_receiver_misesid)
+          await setClaimReceiveAddress(txhash)
         }
         resetData()
       }
@@ -426,7 +426,7 @@ function MISToMB() {
           </p>
           <div className='flex justify-center items-center mt-40'>
             <Button className='w-[40%]' onClick={redeemSubmit} style={{ "--background-color": "#5d61ff", "--border-color": "#5d61ff", borderRadius: 12 }}>
-              <span className='text-white'>Comfirm</span>
+              <span className='text-white'>Confirm</span>
             </Button>
           </div>
         </div>
