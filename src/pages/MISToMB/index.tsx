@@ -222,6 +222,10 @@ function MISToMB() {
 
   const buttonClick = async () => {
     try {
+      const { misesEthereum } = window;
+      if (misesEthereum === undefined) {
+          throw new Error('Please download the latest version of Mises Browser.')
+      }
       // connect mises wallet
       if(stepStatus === 1) {
         await misesProviderActivate()
