@@ -4,7 +4,8 @@ import { useRequest } from "ahooks";
 import { useEffect, useState } from "react";
 import { useLCDClient } from "./uselcdClient";
 import BigNumber from "bignumber.js";
-import { AuthInfo, Coin, Coins, Fee, MsgSend, SignDoc, TxBody, SignerInfo, ModeInfo } from "@terra-money/terra.js";
+import { Buffer } from "buffer"
+import { AuthInfo, Coin, Coins, Fee, MsgSend, SignDoc, TxBody, SignerInfo, ModeInfo, SimplePublicKey } from "@terra-money/terra.js";
 import { AuthInfo as CosmosAuthInfo } from "@terra-money/terra.proto/cosmos/tx/v1beta1/tx";
 export async function walletProvider() {
   if (window.misesWallet) {
@@ -54,6 +55,7 @@ export function useMisesWallet() {
         setisActivating(false)
         checkConnect(provider)
         window.addEventListener("mises_keystorechange", async () => {
+          console.log('activate', 'case 1')
           activate(provider)
         })
       }
@@ -66,12 +68,16 @@ export function useMisesWallet() {
     const isUnlock = await provider.isUnlocked()
     console.log(isUnlock, getMisesAccount)
     if (getMisesAccount && isUnlock) {
+      console.log('activate', 'case 2')
       activate(provider)
     }
   }
 
   const chainId = 'mainnet';
 
+  // function delay(ms: number) {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
   const activate = async (provider = misesProvider) => {
     console.log(provider)
     try {
@@ -85,11 +91,13 @@ export function useMisesWallet() {
         setaccount(result.address)
         
         const tokenRes = await signin(result.auth)
+        //await delay(30000);
         setToken('mises-token', tokenRes.token)
 
         localStorage.setItem('misesAccount', result.address)
         const params = new URLSearchParams(`?${result.auth}`)
         if (params.get('pubkey') && params.get('sig') && params.get('nonce')) {
+          console.log('set pubkey', params.get('pubkey'))
           setmisesAccountData({
             pubkey: params.get('pubkey')!,
             sig: params.get('sig')!,
@@ -146,7 +154,14 @@ export function useMisesWallet() {
       const fee = new Fee(estimatedGas, gasCoins)
       const messages = [new MsgSend(account, burnAddress, new Coins([Coin.fromData({ "denom": "umis", "amount": sendValue })]))]
       const sequence =  accountInfo.getSequenceNumber()
-      const pubkey =  accountInfo.getPublicKey()
+      let pubkey =  accountInfo.getPublicKey()
+
+      await misesProvider.enable(chainId);
+
+      if (pubkey === null) {
+        const key = await misesProvider.getKey(chainId)
+        pubkey = new SimplePublicKey(Buffer.from(key.pubKey).toString('base64'))
+      }
       const signerInfo = new SignerInfo(
         pubkey!,
         sequence,
@@ -161,7 +176,6 @@ export function useMisesWallet() {
         new AuthInfo([signerInfo], fee),
         new TxBody(messages, memo)
       )
-      await misesProvider.enable(chainId);
       
       const signResp = await misesProvider.signDirect(chainId, account, doc.toProto(), {})
       console.log( CosmosAuthInfo.decode(doc.toProto().authInfoBytes))
