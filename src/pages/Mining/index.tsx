@@ -1,5 +1,5 @@
 import { fetchAdMiningData, reportAds, signin } from '@/api';
-//import { usePageValue } from '@/components/pageProvider';
+import { usePageValue } from '@/components/pageProvider';
 import { getSwapLink, getToken, removeToken, setToken, shortenAddress } from '@/utils';
 import { useBoolean, useDocumentVisibility, useRequest } from 'ahooks';
 import { Button, CenterPopup, Image, Toast } from 'antd-mobile'
@@ -226,7 +226,7 @@ function Mining() {
     }
   }
 
-  //const { accountData } = usePageValue()
+  const { accountData } = usePageValue()
 
   const { data: adMiningData, run, refresh, error } = useRequest(fetchAdMiningData, {
     retryCount: 3,
