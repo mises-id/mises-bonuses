@@ -47,7 +47,10 @@ const isProd = process.env.REACT_APP_NODE_ENV==='production'
 // if(istest){
 //   headers['Mises-Env'] = 'development'
 // }
-const baseURL = isProd ? 'https://api.alb.mises.site/api' : 'https://api.test.mises.site/api'
+
+//const baseURL = isProd ? 'https://api.alb.mises.site/api' : 'https://api.test.mises.site/api'
+
+const baseURL = 'https://api.alb.mises.site/api'
 
 const request = axios.create({
   headers: { 'Content-Type': 'application/json' },
